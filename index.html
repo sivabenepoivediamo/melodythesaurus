@@ -1,0 +1,1363 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>melodythesaurus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --ink: #0B0C0A;
+            --ink-2: #14150F;
+            --paper: #EDEAE2;
+            --paper-dim: #A8A498;
+            --paper-faint: #5B584E;
+            --brass: #D9B44A;
+            --brass-dim: #8A7433;
+            --reed: #5B7C99;
+            --reed-dim: #395163;
+            --rust: #C1552E;
+            --rule: #2A2B23;
+            --mono: 'IBM Plex Mono', monospace;
+            --sans: 'IBM Plex Sans', sans-serif;
+            --serif: 'IBM Plex Serif', serif;
+        }
+        html, body {
+            margin: 0; padding: 0;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: var(--sans);
+            -webkit-font-smoothing: antialiased;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
+        .wrap {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+        }
+
+        header {
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--rule);
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        h1 {
+            font-family: var(--serif);
+            font-weight: 600;
+            font-size: clamp(26px, 3.6vw, 40px);
+            margin: 0;
+            letter-spacing: -0.01em;
+            color: var(--paper);
+        }
+        .t-melody { color: var(--paper); }
+        .t-thesaurus { font-style: italic; color: var(--paper-dim); }
+        .header-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--paper-dim);
+        }
+        .header-controls .field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-controls .field label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .header-controls .field .num {
+            color: var(--brass);
+            font-weight: 500;
+            min-width: 20px;
+            text-align: center;
+        }
+        .header-controls input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 90px;
+            height: 3px;
+            background: var(--rule);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        .header-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+            margin-top: -1px;
+        }
+        .header-controls input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+        }
+        .header-controls .root-label {
+            color: var(--paper);
+            font-weight: 500;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 820px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--ink-2);
+            border: 1px solid var(--rule);
+            border-radius: 3px;
+            padding: 18px 20px 20px;
+        }
+        .panel-title {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--paper-faint);
+            margin: 0 0 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .panel-title span.val { color: var(--brass); }
+
+        .mode-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .mode-btn {
+            font-family: var(--mono);
+            font-size: 12px;
+            text-align: left;
+            background: var(--ink);
+            color: var(--paper-dim);
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            padding: 6px 12px;
+            cursor: pointer;
+            line-height: 1.4;
+            transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+            width: 100%;
+        }
+        .mode-btn:hover {
+            border-color: var(--paper-dim);
+            color: var(--paper);
+        }
+        .mode-btn.active {
+            background: var(--brass);
+            color: var(--ink);
+            border-color: var(--brass);
+            font-weight: 600;
+            box-shadow: 0 0 0 1px var(--brass);
+        }
+
+        .op-desc {
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.6;
+            color: var(--paper-faint);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--rule);
+            white-space: pre-wrap;
+        }
+        .op-desc b { color: var(--reed); font-weight: 500; }
+
+        .offsets {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .offset-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .offset-row .tag {
+            font-family: var(--mono);
+            font-size: 11px;
+            width: 24px;
+            text-align: center;
+            color: var(--ink);
+            background: var(--brass);
+            border-radius: 2px;
+            padding: 2px 0;
+            flex: none;
+            font-weight: 600;
+        }
+        .offset-row.l .tag { background: var(--reed); }
+        .offset-row.m .tag { background: var(--paper-dim); }
+        .offset-row input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: var(--rule);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        .offset-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+            margin-top: -1px;
+        }
+        .offset-row input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+        }
+        .offset-row .num {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--paper);
+            width: 34px;
+            text-align: right;
+            flex: none;
+        }
+
+        .pair-row {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+        }
+        .pair-row .half {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pair-row .half .tag {
+            font-family: var(--mono);
+            font-size: 11px;
+            width: 24px;
+            text-align: center;
+            color: var(--ink);
+            background: var(--brass);
+            border-radius: 2px;
+            padding: 2px 0;
+            flex: none;
+            font-weight: 600;
+        }
+        .pair-row .half.l .tag { background: var(--reed); }
+        .pair-row .half input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: var(--rule);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        .pair-row .half input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+            margin-top: -1px;
+        }
+        .pair-row .half input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+        }
+        .pair-row .half .num {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--paper);
+            width: 34px;
+            text-align: right;
+            flex: none;
+        }
+
+        .add-remove {
+            display: flex;
+            gap: 8px;
+            margin-top: 2px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-family: var(--mono);
+            background: transparent;
+            color: var(--paper-dim);
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            padding: 6px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            letter-spacing: .04em;
+            transition: border-color .15s, color .15s, background .15s;
+        }
+        button:hover:not(:disabled) {
+            border-color: var(--paper-dim);
+            color: var(--paper);
+        }
+        button:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+        button.primary {
+            background: var(--brass);
+            color: var(--ink);
+            border-color: var(--brass);
+            font-weight: 600;
+        }
+        button.primary:hover:not(:disabled) {
+            background: #e8c66a;
+            border-color: #e8c66a;
+            color: var(--ink);
+        }
+        button.playing {
+            background: var(--rust);
+            border-color: var(--rust);
+            color: var(--paper);
+        }
+
+        .staff-wrap {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 4px;
+            max-width: 100%;
+            position: relative;
+        }
+        .staff-wrap svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+
+        .staff-meta {
+            display: flex;
+            gap: 22px;
+            flex-wrap: wrap;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--paper-faint);
+            margin-bottom: 12px;
+        }
+        .staff-meta b { color: var(--paper); font-weight: 500; }
+        .legend {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--paper-dim);
+            margin-bottom: 10px;
+        }
+        .legend .sw {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend .dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            display: inline-block;
+            flex: none;
+        }
+
+        .tick-line {
+            stroke: var(--rule);
+            stroke-width: 1;
+        }
+        .note-dot {
+            transition: r .12s, filter .12s;
+            cursor: pointer;
+        }
+        .note-dot.base { fill: var(--paper); }
+        .note-dot.inserted { fill: var(--brass); }
+        .note-dot.active { filter: drop-shadow(0 0 8px var(--rust)); }
+        .note-path {
+            stroke: var(--paper-faint);
+            stroke-width: 1.5;
+            fill: none;
+            opacity: .5;
+        }
+        .note-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            fill: var(--paper-faint);
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        .axis-label {
+            font-family: var(--mono);
+            font-size: 9px;
+            fill: var(--paper-faint);
+            text-anchor: end;
+            dominant-baseline: central;
+        }
+
+        .transport {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .transport .field-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--paper-dim);
+        }
+        .transport .field-inline input[type="range"] {
+            width: 100px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: var(--rule);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        .transport .field-inline input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+            margin-top: -1px;
+        }
+        .transport .field-inline input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+        }
+        .transport .field-inline select {
+            width: auto;
+            padding: 4px 8px;
+            font-size: 11px;
+            background: var(--ink);
+            color: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            font-family: var(--mono);
+            cursor: pointer;
+        }
+
+        .seq-readout {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--paper-faint);
+            line-height: 1.7;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--rule);
+            word-break: break-all;
+        }
+        .seq-readout .hl { color: var(--brass); }
+        .seq-readout .base-hl { color: var(--paper); }
+
+        .base-seq-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--paper-faint);
+            margin-bottom: 4px;
+        }
+        .base-seq-label span { color: var(--paper); }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--rule);
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--paper-faint);
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .staff-wrap::-webkit-scrollbar {
+            height: 6px;
+        }
+        .staff-wrap::-webkit-scrollbar-track {
+            background: var(--ink);
+        }
+        .staff-wrap::-webkit-scrollbar-thumb {
+            background: var(--rule);
+            border-radius: 3px;
+        }
+        .staff-wrap::-webkit-scrollbar-thumb:hover {
+            background: var(--paper-faint);
+        }
+
+        @media (max-width: 560px) {
+            .wrap { padding: 16px 12px 40px; }
+            header { flex-direction: column; align-items: flex-start; }
+            .header-controls { width: 100%; justify-content: space-between; }
+            .header-controls .field input[type="range"] { width: 60px; }
+            .main-grid { gap: 16px; }
+            .panel { padding: 14px 14px 16px; }
+            .transport { gap: 10px; }
+            .transport .field-inline input[type="range"] { width: 70px; }
+            .pair-row { flex-direction: column; gap: 4px; }
+        }
+
+        .space-hint {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--paper-faint);
+            opacity: 0.6;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+
+        <header>
+            <h1><span class="t-melody">melody</span><span class="t-thesaurus">thesaurus</span></h1>
+            <div class="header-controls">
+                <div class="field">
+                    <label>octaves <span class="num" id="nVal">1</span></label>
+                    <input type="range" id="nSlider" min="1" max="4" step="1" value="1" />
+                </div>
+                <div class="field">
+                    <label>divisions <span class="num" id="dVal">2</span></label>
+                    <input type="range" id="dSlider" min="1" max="12" step="1" value="2" />
+                </div>
+                <div class="field">
+                    <label>root <span class="root-label" id="rootVal">C4</span></label>
+                    <input type="range" id="rootSlider" min="48" max="72" step="1" value="60" />
+                </div>
+            </div>
+        </header>
+
+        <div class="main-grid">
+
+            <div class="ops-area">
+
+                <div class="panel">
+                    <p class="panel-title">Operation <span class="val" id="baseSeqLabel"></span></p>
+                    <div class="mode-list" id="modeList"></div>
+                    <div id="opDesc" class="op-desc"></div>
+                    <div class="add-remove" style="margin-top:12px;">
+                        <button id="resetOpBtn">↺ Reset to defaults</button>
+                    </div>
+                </div>
+
+                <div class="panel" id="offsetsPanel">
+                    <p class="panel-title">Offsets <span class="val" id="offsetCountLabel"></span></p>
+                    <div class="offsets" id="offsetsContainer"></div>
+                </div>
+
+            </div>
+
+            <div class="viz">
+
+                <div class="panel">
+                    <p class="panel-title">Pitch ladder</p>
+                    <div class="legend">
+                        <span class="sw"><span class="dot" style="background:var(--paper)"></span>base</span>
+                        <span class="sw"><span class="dot" style="background:var(--brass)"></span>inserted</span>
+                        <span class="sw"><span class="dot" style="background:var(--rust)"></span>playing</span>
+                    </div>
+                    <div class="staff-meta">
+                        <span><b id="metaNoteCount">0</b> notes</span>
+                        <span><b id="metaMinInterval">0</b> semitones · min</span>
+                        <span><b id="metaSpan">0</b> semitones · span</span>
+                    </div>
+                    <div class="staff-wrap">
+                        <svg id="staff" viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet"></svg>
+                    </div>
+
+                    <div class="transport">
+                        <button class="primary" id="playBtn">▶ Play</button>
+                        <span class="space-hint">(spacebar toggles)</span>
+                        <div class="field-inline">
+                            tempo <input type="range" id="tempoSlider" min="60" max="360" step="4" value="168" />
+                            <span id="tempoVal">168</span>ms
+                        </div>
+                        <div class="field-inline">
+                            wave
+                            <select id="waveSelect">
+                                <option value="triangle">triangle</option>
+                                <option value="sine">sine</option>
+                                <option value="sawtooth">sawtooth</option>
+                                <option value="square">square</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="seq-readout" id="seqReadout"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <footer>
+            <span>Click a note dot to hear it. </span>
+            <span style="color:var(--paper-faint);">— based on Slonimsky’s <em>Thesaurus of Scales and Melodic Patterns</em></span>
+        </footer>
+
+    </div>
+
+    <script>
+        (function() {
+            "use strict";
+
+            // ─── Core algorithms ──────────────────────────────────
+            function baseSequence(n, d) {
+                const total = 12 * n, step = total / d, out = [];
+                for (let i = 0; i <= d; i++) out.push(Math.round(i * step));
+                return out;
+            }
+            function intervalsOf(x) { const d = []; for (let i = 0; i < x.length - 1; i++) d.push(x[i+1] - x[i]); return d; }
+
+            function interpolation(x, ks) {
+                const n = x.length, m = ks.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); for (let j = 0; j < m; j++) out.push(x[i] + ks[j]); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function symmetricInterpolation(x, ks) {
+                const n = x.length, m = ks.length, pairs = Math.floor((n-1)/2), out = [];
+                for (let j = 0; j < pairs; j++) {
+                    out.push(x[2*j]);
+                    for (let r = 0; r < m; r++) out.push(x[2*j] + ks[r]);
+                    out.push(x[2*j+1]);
+                    for (let r = m-1; r >= 0; r--) out.push(x[2*j+2] - ks[r]);
+                }
+                if (n % 2 === 1) { out.push(x[n-2]); for (let r = 0; r < m; r++) out.push(x[n-2] + ks[r]); out.push(x[n-1]); }
+                else out.push(x[n-1]);
+                return out;
+            }
+            function asymmetricInterpolation(x, k, l) {
+                const n = x.length;
+                const m = Math.max(k.length, l.length);
+                const kP = k.slice();
+                const lP = l.slice();
+                while (kP.length < m) kP.push(kP.length ? kP[kP.length-1] : 1);
+                while (lP.length < m) lP.push(lP.length ? lP[lP.length-1] : 1);
+
+                const pairs = Math.floor((n-1)/2);
+                const out = [];
+                for (let j = 0; j < pairs; j++) {
+                    out.push(x[2*j]);
+                    for (let r = 0; r < m; r++) out.push(x[2*j] + kP[r]);
+                    out.push(x[2*j+1]);
+                    for (let r = m-1; r >= 0; r--) out.push(x[2*j+2] - lP[r]);
+                }
+                if (n % 2 === 1) {
+                    out.push(x[n-2]);
+                    for (let r = 0; r < m; r++) out.push(x[n-2] + kP[r]);
+                    out.push(x[n-1]);
+                } else {
+                    out.push(x[n-1]);
+                }
+                return out;
+            }
+
+            function ultrapolation(x, ks) {
+                const n = x.length, m = ks.length, out = [x[0]];
+                for (let i = 1; i < n; i++) { for (let r = m-1; r >= 0; r--) out.push(x[i] + ks[r]); out.push(x[i]); }
+                return out;
+            }
+            function infrapolation(x, ks) {
+                const n = x.length, m = ks.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); for (let r = 0; r < m; r++) out.push(x[i] - ks[r]); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function infraInterpolation(x, k, l) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i] - k); out.push(x[i] + l); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function interInfrapolation(x, k, l) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i] + k); out.push(x[i] - l); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function infraUltrapolation(x, k, l) {
+                const n = x.length, out = [x[0], x[0] - k];
+                for (let i = 1; i < n - 1; i++) { out.push(x[i] + l); out.push(x[i]); out.push(x[i] - k); }
+                out.push(x[n-1] + l); out.push(x[n-1]);
+                return out;
+            }
+            function interUltrapolation(x, k, l) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i] + k); out.push(x[i+1] - l); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function ultraInterpolation(x, k, l) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i+1] + k); out.push(x[i] + l); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function infraInterUltrapolation(x, k, l, m) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i] - k); out.push(x[i] + l); out.push(x[i+1] + m); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function interInfraInterpolation(x, k, l, m) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i+1] - k); out.push(x[i] - l); out.push(x[i] + m); }
+                out.push(x[n-1]);
+                return out;
+            }
+            function ultraInfraInterpolation(x, k, l, m) {
+                const n = x.length, out = [];
+                for (let i = 0; i < n - 1; i++) { out.push(x[i]); out.push(x[i+1] + k); out.push(x[i] - l); out.push(x[i] + m); }
+                out.push(x[n-1]);
+                return out;
+            }
+
+            // ─── Operation registry ──────────────────────────────
+            const OPS = {
+                interpolation: {
+                    label: "Interpolation",
+                    tip: "Inserts notes above each step before moving to the next.",
+                    desc: "(xᵢ, xᵢ+k₀, …, xᵢ+kₘ). k is variadic.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    run: (x, o) => interpolation(x, o.k)
+                },
+                symmetricInterpolation: {
+                    label: "Symmetric Interpolation",
+                    tip: "Mirrors upper/lower infixes across each pair of steps.",
+                    desc: "Alternates upper/lower infixes pair by pair, symmetric about the pair's midpoint.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    run: (x, o) => symmetricInterpolation(x, o.k)
+                },
+                asymmetricInterpolation: {
+                    label: "Asymmetric Interpolation",
+                    tip: "Upper (k) and lower (l) offsets are linked as pairs.",
+                    desc: "Each pair (kᵢ, lᵢ) adds one upper and one lower offset. Both arrays are padded to the same length automatically.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [3] }, { group: 'l', variadic: true, defaults: [2] }],
+                    run: (x, o) => asymmetricInterpolation(x, o.k, o.l)
+                },
+                ultrapolation: {
+                    label: "Ultrapolation",
+                    tip: "Extends past each step instead of filling between steps.",
+                    desc: "(xᵢ+kₘ, …, xᵢ+k₀, xᵢ). k is variadic.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    run: (x, o) => ultrapolation(x, o.k)
+                },
+                infrapolation: {
+                    label: "Infrapolation",
+                    tip: "Inserts notes below each step before moving to the next.",
+                    desc: "(xᵢ, xᵢ−k₀, …, xᵢ−kₘ). k is variadic.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    run: (x, o) => infrapolation(x, o.k)
+                },
+                infraInterpolation: {
+                    label: "Infra-Interpolation",
+                    tip: "Lower neighbor then upper neighbor at every step.",
+                    desc: "(xᵢ, xᵢ−k, xᵢ+l) at every step.",
+                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [3] }],
+                    run: (x, o) => infraInterpolation(x, o.k[0], o.l[0])
+                },
+                interInfrapolation: {
+                    label: "Inter-Infrapolation",
+                    tip: "Upper neighbor then lower neighbor at every step.",
+                    desc: "(xᵢ, xᵢ+k, xᵢ−l) at every step.",
+                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [2] }],
+                    run: (x, o) => interInfrapolation(x, o.k[0], o.l[0])
+                },
+                infraUltrapolation: {
+                    label: "Infra-Ultrapolation",
+                    tip: "Lower neighbor at the start, alternating through to upper at the end.",
+                    desc: "Lower (k) at the first step, alternating upper (l) / lower (k) through the middle, upper (l) at the last step.",
+                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [4] }],
+                    run: (x, o) => infraUltrapolation(x, o.k[0], o.l[0])
+                },
+                interUltrapolation: {
+                    label: "Inter-Ultrapolation",
+                    tip: "Upper neighbor of this step, lower neighbor of the next.",
+                    desc: "(xᵢ, xᵢ+k, xᵢ₊₁−l).",
+                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [2] }],
+                    run: (x, o) => interUltrapolation(x, o.k[0], o.l[0])
+                },
+                ultraInterpolation: {
+                    label: "Ultra-Interpolation",
+                    tip: "Upper neighbor of the next step, then upper neighbor of this one.",
+                    desc: "(xᵢ, xᵢ₊₁+k, xᵢ+l).",
+                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [1] }],
+                    run: (x, o) => ultraInterpolation(x, o.k[0], o.l[0])
+                },
+                infraInterUltrapolation: {
+                    label: "Infra-Inter-Ultrapolation",
+                    tip: "Chains lower, upper, and next-step-upper neighbors in one pass.",
+                    desc: "(xᵢ, xᵢ−k, xᵢ+l, xᵢ₊₁+m) — all three families chained at once.",
+                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [3] }, { group: 'm', variadic: false, defaults: [1] }],
+                    run: (x, o) => infraInterUltrapolation(x, o.k[0], o.l[0], o.m[0])
+                },
+                interInfraInterpolation: {
+                    label: "Inter-Infra-Interpolation",
+                    tip: "Rare composite: next-step-lower, then lower, then upper.",
+                    desc: "(xᵢ, xᵢ₊₁−k, xᵢ−l, xᵢ+m) — appears once in the Thesaurus.",
+                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [3] }, { group: 'm', variadic: false, defaults: [1] }],
+                    run: (x, o) => interInfraInterpolation(x, o.k[0], o.l[0], o.m[0])
+                },
+                ultraInfraInterpolation: {
+                    label: "Ultra-Infra-Interpolation",
+                    tip: "Rare composite: next-step-upper, then lower, then upper.",
+                    desc: "(xᵢ, xᵢ₊₁+k, xᵢ−l, xᵢ+m) — appears once in the Thesaurus.",
+                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [2] }, { group: 'm', variadic: false, defaults: [1] }],
+                    run: (x, o) => ultraInfraInterpolation(x, o.k[0], o.l[0], o.m[0])
+                }
+            };
+
+            // ─── State & cache ────────────────────────────────────
+            const state = {
+                n: 1, d: 2, root: 60,
+                op: 'interpolation',
+                offsetValues: { k: [3], l: [2], m: [1] },
+                tempo: 168,
+                wave: 'triangle',
+            };
+
+            const opCache = {};
+
+            // ─── DOM refs ─────────────────────────────────────────
+            const nSlider = document.getElementById('nSlider');
+            const dSlider = document.getElementById('dSlider');
+            const rootSlider = document.getElementById('rootSlider');
+            const nVal = document.getElementById('nVal');
+            const dVal = document.getElementById('dVal');
+            const rootVal = document.getElementById('rootVal');
+            const baseSeqLabel = document.getElementById('baseSeqLabel');
+            const modeList = document.getElementById('modeList');
+            const opDesc = document.getElementById('opDesc');
+            const resetOpBtn = document.getElementById('resetOpBtn');
+            const offsetsContainer = document.getElementById('offsetsContainer');
+            const offsetCountLabel = document.getElementById('offsetCountLabel');
+            const staffSvg = document.getElementById('staff');
+            const seqReadout = document.getElementById('seqReadout');
+            const metaNoteCount = document.getElementById('metaNoteCount');
+            const metaMinInterval = document.getElementById('metaMinInterval');
+            const metaSpan = document.getElementById('metaSpan');
+            const playBtn = document.getElementById('playBtn');
+            const tempoSlider = document.getElementById('tempoSlider');
+            const tempoVal = document.getElementById('tempoVal');
+            const waveSelect = document.getElementById('waveSelect');
+
+            const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+            function midiName(m) {
+                const oct = Math.floor(m/12) - 1;
+                const name = NOTE_NAMES[((m%12)+12)%12];
+                return name + oct;
+            }
+
+            // ─── Cache helpers ──────────────────────────────────
+            function saveCurrentToCache() {
+                const op = state.op;
+                if (!opCache[op]) opCache[op] = {};
+                opCache[op].k = state.offsetValues.k.slice();
+                opCache[op].l = state.offsetValues.l.slice();
+                opCache[op].m = state.offsetValues.m.slice();
+            }
+
+            function loadFromCacheOrDefault(opKey) {
+                const spec = OPS[opKey];
+                const groups = spec.offsets.map(g => g.group);
+                if (opCache[opKey]) {
+                    const cached = opCache[opKey];
+                    const allPresent = groups.every(g => cached[g] !== undefined && cached[g].length > 0);
+                    if (allPresent) {
+                        return {
+                            k: cached.k.slice(),
+                            l: cached.l.slice(),
+                            m: cached.m.slice(),
+                        };
+                    }
+                }
+                const defs = { k: [], l: [], m: [] };
+                spec.offsets.forEach(g => {
+                    defs[g.group] = g.defaults.slice();
+                });
+                opCache[opKey] = {
+                    k: defs.k.slice(),
+                    l: defs.l.slice(),
+                    m: defs.m.slice(),
+                };
+                return defs;
+            }
+
+            // ─── Build operation list ─────────────────────────────
+            function buildModeList() {
+                modeList.innerHTML = '';
+                Object.keys(OPS).forEach(key => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'mode-btn' + (key === state.op ? ' active' : '');
+                    btn.title = OPS[key].tip;
+                    btn.textContent = OPS[key].label;
+                    btn.addEventListener('click', () => {
+                        saveCurrentToCache();
+                        state.op = key;
+                        const loaded = loadFromCacheOrDefault(key);
+                        state.offsetValues = {
+                            k: loaded.k.slice(),
+                            l: loaded.l.slice(),
+                            m: loaded.m.slice(),
+                        };
+                        buildModeList();
+                        buildOffsetsUI();
+                        render();
+                    });
+                    modeList.appendChild(btn);
+                });
+            }
+            buildModeList();
+
+            // ─── Offsets UI ───────────────────────────────────────
+            function buildOffsetsUI() {
+                offsetsContainer.innerHTML = '';
+                const spec = OPS[state.op].offsets;
+                const isAsymmetric = (state.op === 'asymmetricInterpolation');
+
+                if (isAsymmetric) {
+                    const kArr = state.offsetValues.k;
+                    const lArr = state.offsetValues.l;
+                    while (kArr.length < lArr.length) kArr.push(kArr.length ? kArr[kArr.length-1] : 1);
+                    while (lArr.length < kArr.length) lArr.push(lArr.length ? lArr[lArr.length-1] : 1);
+                    const len = kArr.length;
+                    const minCount = 1;
+
+                    for (let i = 0; i < len; i++) {
+                        const pairDiv = document.createElement('div');
+                        pairDiv.className = 'pair-row';
+
+                        const kHalf = document.createElement('div');
+                        kHalf.className = 'half';
+                        kHalf.innerHTML = `
+                            <span class="tag">k${i+1}</span>
+                            <input type="range" min="-12" max="12" step="1" value="${kArr[i]}">
+                            <span class="num">${kArr[i]}</span>
+                        `;
+                        const kInput = kHalf.querySelector('input');
+                        const kNum = kHalf.querySelector('.num');
+                        kInput.addEventListener('input', () => {
+                            kArr[i] = parseInt(kInput.value, 10);
+                            kNum.textContent = kArr[i];
+                            render();
+                        });
+                        pairDiv.appendChild(kHalf);
+
+                        const lHalf = document.createElement('div');
+                        lHalf.className = 'half l';
+                        lHalf.innerHTML = `
+                            <span class="tag">l${i+1}</span>
+                            <input type="range" min="-12" max="12" step="1" value="${lArr[i]}">
+                            <span class="num">${lArr[i]}</span>
+                        `;
+                        const lInput = lHalf.querySelector('input');
+                        const lNum = lHalf.querySelector('.num');
+                        lInput.addEventListener('input', () => {
+                            lArr[i] = parseInt(lInput.value, 10);
+                            lNum.textContent = lArr[i];
+                            render();
+                        });
+                        pairDiv.appendChild(lHalf);
+
+                        offsetsContainer.appendChild(pairDiv);
+                    }
+
+                    const controls = document.createElement('div');
+                    controls.className = 'add-remove';
+                    const addBtn = document.createElement('button');
+                    addBtn.textContent = '+ add pair';
+                    addBtn.addEventListener('click', () => {
+                        const lastK = kArr.length ? kArr[kArr.length-1] : 1;
+                        const lastL = lArr.length ? lArr[lArr.length-1] : 1;
+                        kArr.push(lastK + 1);
+                        lArr.push(lastL + 1);
+                        buildOffsetsUI();
+                        render();
+                    });
+                    controls.appendChild(addBtn);
+
+                    const rmBtn = document.createElement('button');
+                    rmBtn.textContent = '– remove pair';
+                    rmBtn.disabled = (len <= minCount);
+                    rmBtn.addEventListener('click', () => {
+                        if (kArr.length > minCount && lArr.length > minCount) {
+                            kArr.pop();
+                            lArr.pop();
+                            buildOffsetsUI();
+                            render();
+                        }
+                    });
+                    controls.appendChild(rmBtn);
+                    offsetsContainer.appendChild(controls);
+
+                    offsetCountLabel.textContent = (len * 2) + ' params';
+                    opDesc.innerHTML = OPS[state.op].desc.replace(/\n/g, '<br>');
+                    return;
+                }
+
+                // all other operations
+                let totalCount = 0;
+                spec.forEach(group => {
+                    const g = state.offsetValues[group.group];
+                    if (!g || g.length === 0) {
+                        state.offsetValues[group.group] = group.defaults.slice();
+                    }
+                    const arr = state.offsetValues[group.group];
+                    totalCount += arr.length;
+                    const minCount = 1;
+
+                    arr.forEach((val, idx) => {
+                        const row = document.createElement('div');
+                        row.className = 'offset-row ' + group.group;
+                        const label = group.variadic ? (group.group + (idx + 1)) : group.group;
+                        row.innerHTML = `
+                            <span class="tag">${label}</span>
+                            <input type="range" min="-12" max="12" step="1" value="${val}">
+                            <span class="num">${val}</span>
+                        `;
+                        const input = row.querySelector('input');
+                        const num = row.querySelector('.num');
+                        input.addEventListener('input', () => {
+                            arr[idx] = parseInt(input.value, 10);
+                            num.textContent = arr[idx];
+                            render();
+                        });
+                        offsetsContainer.appendChild(row);
+                    });
+
+                    if (group.variadic) {
+                        const controls = document.createElement('div');
+                        controls.className = 'add-remove';
+                        const addBtn = document.createElement('button');
+                        addBtn.textContent = '+ add ' + group.group;
+                        addBtn.addEventListener('click', () => {
+                            const last = arr[arr.length - 1] ?? 1;
+                            arr.push(last + 1);
+                            buildOffsetsUI();
+                            render();
+                        });
+                        controls.appendChild(addBtn);
+
+                        const rmBtn = document.createElement('button');
+                        rmBtn.textContent = '– remove';
+                        rmBtn.disabled = (arr.length <= minCount);
+                        rmBtn.addEventListener('click', () => {
+                            if (arr.length > minCount) {
+                                arr.pop();
+                                buildOffsetsUI();
+                                render();
+                            }
+                        });
+                        controls.appendChild(rmBtn);
+                        offsetsContainer.appendChild(controls);
+                    }
+                });
+
+                offsetCountLabel.textContent = totalCount + ' param' + (totalCount === 1 ? '' : 's');
+                opDesc.innerHTML = OPS[state.op].desc.replace(/\n/g, '<br>');
+            }
+
+            // ─── Compute sequence ────────────────────────────────
+            function computeSequence() {
+                const base = baseSequence(state.n, state.d);
+                const spec = OPS[state.op];
+                const opts = {
+                    k: state.offsetValues.k ? state.offsetValues.k.slice() : [],
+                    l: state.offsetValues.l ? state.offsetValues.l.slice() : [],
+                    m: state.offsetValues.m ? state.offsetValues.m.slice() : [],
+                };
+                let result;
+                try { result = spec.run(base, opts); } catch (_) { result = base.slice(); }
+                return { base, result };
+            }
+
+            function isBaseNote(val, base) { return base.includes(val); }
+
+            // ─── Render ───────────────────────────────────────────
+            let lastRender = null;
+
+            function render() {
+                const { base, result } = computeSequence();
+                lastRender = { base, result };
+
+                baseSeqLabel.textContent = 'base: ' + base.join(' · ');
+                const minInt = Math.min(...intervalsOf(result));
+                const span = Math.max(...result) - Math.min(...result);
+                metaNoteCount.textContent = result.length;
+                metaMinInterval.textContent = minInt;
+                metaSpan.textContent = span;
+
+                const padX = 48, padY = 22;
+                const minV = Math.min(...result, ...base);
+                const maxV = Math.max(...result, ...base);
+                const vRange = Math.max(1, maxV - minV);
+                const noteSpacing = 50;
+                const vw = padX * 2 + noteSpacing * (result.length - 1) + 20;
+                const vh = padY * 2 + vRange * 14 + 60;
+                const vBoxW = Math.max(600, vw);
+                const vBoxH = Math.max(240, vh);
+                staffSvg.setAttribute('viewBox', `0 0 ${vBoxW} ${vBoxH}`);
+                staffSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+                function yFor(v) {
+                    return padY + (1 - (v - minV) / vRange) * (vBoxH - padY * 2 - 20);
+                }
+                function xFor(i) {
+                    const total = Math.max(1, result.length - 1);
+                    const spanX = vBoxW - padX * 2 - 10;
+                    return padX + (i / total) * spanX;
+                }
+
+                const ns = 'http://www.w3.org/2000/svg';
+                const svg = staffSvg;
+                svg.innerHTML = '';
+
+                function el(tag, attrs) {
+                    const e = document.createElementNS(ns, tag);
+                    for (const k in attrs) e.setAttribute(k, attrs[k]);
+                    return e;
+                }
+
+                base.forEach(b => {
+                    const y = yFor(b);
+                    svg.appendChild(el('line', { x1: padX - 12, x2: vBoxW - padX + 12, y1: y, y2: y, class: 'tick-line' }));
+                    const label = el('text', { x: padX - 16, y: y, class: 'axis-label' });
+                    label.textContent = midiName(state.root + b);
+                    svg.appendChild(label);
+                });
+
+                let d = '';
+                result.forEach((v, i) => {
+                    const x = xFor(i), y = yFor(v);
+                    d += (i === 0 ? 'M' : 'L') + x + ' ' + y + ' ';
+                });
+                svg.appendChild(el('path', { d, class: 'note-path' }));
+
+                result.forEach((v, i) => {
+                    const x = xFor(i), y = yFor(v);
+                    const baseNote = isBaseNote(v, base);
+                    const r = baseNote ? 6 : 4.5;
+                    const dot = el('circle', {
+                        cx: x, cy: y, r: r,
+                        class: 'note-dot ' + (baseNote ? 'base' : 'inserted'),
+                        'data-idx': i, 'data-val': v
+                    });
+                    svg.appendChild(dot);
+                    const label = el('text', { x, y: y - (baseNote ? 14 : 11), class: 'note-label' });
+                    label.textContent = v;
+                    svg.appendChild(label);
+                });
+
+                seqReadout.innerHTML = 'sequence (semitones from root): ' +
+                    result.map(v => `<span class="${isBaseNote(v, base) ? 'base-hl' : 'hl'}">${v}</span>`).join(', ');
+            }
+
+            // ─── Audio ────────────────────────────────────────────
+            let audioCtx = null, playing = false, playToken = 0;
+
+            function ensureAudio() {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return audioCtx;
+            }
+            function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+            function playNote(freq, duration, whenOffset) {
+                const ctx = ensureAudio();
+                const t0 = ctx.currentTime + whenOffset;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = state.wave;
+                osc.frequency.setValueAtTime(freq, t0);
+                gain.gain.setValueAtTime(0, t0);
+                gain.gain.linearRampToValueAtTime(0.22, t0 + 0.008);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+                osc.connect(gain).connect(ctx.destination);
+                osc.start(t0);
+                osc.stop(t0 + duration + 0.02);
+            }
+
+            function highlightNote(idx) {
+                staffSvg.querySelectorAll('.note-dot').forEach(d => d.classList.remove('active'));
+                const dot = staffSvg.querySelector(`.note-dot[data-idx="${idx}"]`);
+                if (dot) dot.classList.add('active');
+            }
+
+            function stopPlayback() {
+                playing = false;
+                playToken++;
+                playBtn.classList.remove('playing');
+                playBtn.textContent = '▶ Play';
+                staffSvg.querySelectorAll('.note-dot').forEach(d => d.classList.remove('active'));
+            }
+
+            async function playSequence() {
+                if (playing) { stopPlayback(); return; }
+                ensureAudio();
+                playing = true;
+                const myToken = ++playToken;
+                playBtn.classList.add('playing');
+                playBtn.textContent = '■ Stop';
+
+                const { result } = lastRender ?? computeSequence();
+                const stepMs = state.tempo;
+                const stepSec = stepMs / 1000;
+
+                for (let i = 0; i < result.length; i++) {
+                    if (playToken !== myToken) return;
+                    const freq = midiToFreq(state.root + result[i]);
+                    playNote(freq, stepSec * 0.92, 0);
+                    highlightNote(i);
+                    await new Promise(r => setTimeout(r, stepMs));
+                    if (playToken !== myToken) return;
+                }
+                if (playToken === myToken) stopPlayback();
+            }
+
+            staffSvg.addEventListener('click', (e) => {
+                const dot = e.target.closest('.note-dot');
+                if (!dot) return;
+                const val = parseInt(dot.getAttribute('data-val'), 10);
+                ensureAudio();
+                playNote(midiToFreq(state.root + val), 0.5, 0);
+                dot.classList.add('active');
+                setTimeout(() => dot.classList.remove('active'), 250);
+            });
+
+            // ─── Spacebar shortcut ───────────────────────────────
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    const tag = e.target.tagName;
+                    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                    e.preventDefault();
+                    playBtn.click();
+                }
+            });
+
+            // ─── Control wiring ──────────────────────────────────
+            function handleSliderChange() {
+                state.n = parseInt(nSlider.value, 10);
+                nVal.textContent = state.n;
+                state.d = parseInt(dSlider.value, 10);
+                dVal.textContent = state.d;
+                state.root = parseInt(rootSlider.value, 10);
+                rootVal.textContent = midiName(state.root);
+                render();
+            }
+            nSlider.addEventListener('input', handleSliderChange);
+            dSlider.addEventListener('input', handleSliderChange);
+            rootSlider.addEventListener('input', handleSliderChange);
+
+            resetOpBtn.addEventListener('click', () => {
+                const spec = OPS[state.op];
+                const defs = { k: [], l: [], m: [] };
+                spec.offsets.forEach(g => {
+                    defs[g.group] = g.defaults.slice();
+                });
+                state.offsetValues = {
+                    k: defs.k.slice(),
+                    l: defs.l.slice(),
+                    m: defs.m.slice(),
+                };
+                opCache[state.op] = {
+                    k: defs.k.slice(),
+                    l: defs.l.slice(),
+                    m: defs.m.slice(),
+                };
+                buildOffsetsUI();
+                render();
+            });
+
+            tempoSlider.addEventListener('input', () => {
+                state.tempo = parseInt(tempoSlider.value, 10);
+                tempoVal.textContent = state.tempo;
+            });
+            waveSelect.addEventListener('change', () => {
+                state.wave = waveSelect.value;
+            });
+            playBtn.addEventListener('click', playSequence);
+
+            // ─── Init ─────────────────────────────────────────────
+            rootVal.textContent = midiName(state.root);
+            const initLoad = loadFromCacheOrDefault(state.op);
+            state.offsetValues = {
+                k: initLoad.k.slice(),
+                l: initLoad.l.slice(),
+                m: initLoad.m.slice(),
+            };
+            buildOffsetsUI();
+            render();
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(render, 120);
+            });
+        })();
+    </script>
+</body>
+</html>
