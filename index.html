@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -260,6 +259,39 @@
             flex: none;
         }
 
+        .drag-handle {
+            flex: none;
+            width: 12px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--paper-faint);
+            opacity: 0.45;
+            cursor: grab;
+            font-size: 10px;
+            line-height: 1;
+            user-select: none;
+            -webkit-user-drag: element;
+            transition: color .15s, opacity .15s;
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .drag-handle:hover { color: var(--paper); opacity: 1; }
+        .draggable.dragging { opacity: 0.4; }
+        .draggable.drag-over {
+            box-shadow: inset 0 0 0 1px var(--brass);
+            border-radius: 2px;
+        }
+        .draggable.drag-over .drag-handle { color: var(--brass); opacity: 1; }
+        .pair-row.draggable {
+            position: relative;
+            padding-left: 2px;
+        }
+        .pair-row .pair-handle {
+            align-self: center;
+        }
+
         .pair-row {
             display: flex;
             gap: 12px;
@@ -369,15 +401,16 @@
 
         .staff-wrap {
             overflow-x: auto;
-            overflow-y: hidden;
+            overflow-y: auto;
             padding-bottom: 4px;
             max-width: 100%;
+            height: 320px;
             position: relative;
         }
         .staff-wrap svg {
             display: block;
             width: 100%;
-            height: auto;
+            height: 100%;
             max-width: 100%;
         }
 
@@ -522,17 +555,6 @@
         }
         .base-seq-label span { color: var(--paper); }
 
-        footer {
-            margin-top: 32px;
-            padding-top: 16px;
-            border-top: 1px solid var(--rule);
-            font-family: var(--mono);
-            font-size: 10.5px;
-            color: var(--paper-faint);
-            line-height: 1.7;
-            text-align: center;
-        }
-
         .staff-wrap::-webkit-scrollbar {
             height: 6px;
         }
@@ -565,6 +587,222 @@
             color: var(--paper-faint);
             opacity: 0.6;
             margin-left: 4px;
+        }
+
+        /* ─── Harmony panel ─── */
+        .harmony-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .switch {
+            position: relative;
+            width: 38px;
+            height: 20px;
+            flex: none;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch .slider {
+            position: absolute; inset: 0;
+            background: var(--rule);
+            border: 1px solid var(--paper-faint);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background .15s, border-color .15s;
+        }
+        .switch .slider::before {
+            content: '';
+            position: absolute;
+            width: 14px; height: 14px;
+            left: 2px; top: 2px;
+            background: var(--paper-dim);
+            border-radius: 50%;
+            transition: transform .15s, background .15s;
+        }
+        .switch input:checked + .slider { background: var(--brass-dim); border-color: var(--brass); }
+        .switch input:checked + .slider::before { transform: translateX(18px); background: var(--brass); }
+
+        .harmony-body { margin-top: 14px; display: flex; flex-direction: column; gap: 14px; }
+        .harmony-body.disabled { opacity: .35; pointer-events: none; }
+
+        .seg-control {
+            display: flex;
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .seg-control button {
+            flex: 1;
+            border: none;
+            border-radius: 0;
+            background: var(--ink);
+        }
+        .seg-control button + button { border-left: 1px solid var(--rule); }
+        .seg-control button.active {
+            background: var(--reed);
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .harmony-group { display: flex; flex-direction: column; gap: 8px; }
+        .harmony-group-label {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--paper-faint);
+        }
+        .crit-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .crit-input-row input[type="text"] {
+            flex: 1;
+            font-family: var(--mono);
+            font-size: 12px;
+            background: var(--ink);
+            color: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            padding: 6px 8px;
+        }
+        .crit-input-row input[type="text"]:focus {
+            outline: none;
+            border-color: var(--reed);
+        }
+        .crit-preview {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--paper-faint);
+        }
+        .crit-preview .role-active { color: var(--brass); font-weight: 600; }
+        .preset-select {
+            width: 100%;
+            font-family: var(--mono);
+            font-size: 11.5px;
+            background: var(--ink);
+            color: var(--paper-dim);
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            padding: 5px 7px;
+            cursor: pointer;
+        }
+        .preset-select:focus { outline: none; border-color: var(--reed); }
+        .step-hint {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--paper-faint);
+            opacity: 0.7;
+        }
+        .voice-count-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--paper-dim);
+        }
+        .voice-count-row input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: var(--rule);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        .voice-count-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--brass);
+            border: 2px solid var(--ink-2);
+            box-shadow: 0 0 0 1px var(--brass);
+            cursor: grab;
+        }
+        .voice-count-row .num { color: var(--brass); font-weight: 600; min-width: 32px; text-align: center; }
+
+        .auto-toggle-btn {
+            flex: none;
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 4px 10px;
+            background: transparent;
+            color: var(--paper-dim);
+            border: 1px solid var(--rule);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: background .15s, color .15s, border-color .15s;
+        }
+        .auto-toggle-btn:hover { border-color: var(--brass); color: var(--paper); }
+        .auto-toggle-btn.active {
+            background: var(--brass);
+            color: var(--ink);
+            border-color: var(--brass);
+            font-weight: 600;
+        }
+        .voice-count-row input[type="range"].auto-dimmed {
+            opacity: 0.5;
+        }
+        .voice-count-row input[type="range"].auto-dimmed::-webkit-slider-thumb {
+            box-shadow: 0 0 0 1px var(--paper-faint);
+            background: var(--paper-dim);
+        }
+
+        .harmony-err {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--rust);
+            min-height: 14px;
+        }
+
+        .note-dot.chord-tone { fill: var(--reed); }
+        .note-dot.chord-tone.chord-root { fill: var(--brass); }
+
+        .histo-wrap {
+            margin-top: 10px;
+            padding: 10px 12px 14px;
+            background: var(--ink-2);
+            border: 1px solid var(--rule);
+            border-radius: 3px;
+        }
+        .histo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .histo-title {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--paper-faint);
+        }
+        .histo-btns {
+            display: flex;
+            gap: 6px;
+        }
+        .histo-btns button {
+            font-family: var(--mono);
+            font-size: 10px;
+            background: var(--ink);
+            border: 1px solid var(--rule);
+            color: var(--paper-dim);
+            padding: 3px 8px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        #randomizeOverridesBtn:hover { color: var(--brass); border-color: var(--brass); }
+        #clearAllOverridesBtn:hover { color: var(--rust); border-color: var(--rust); }
+        .step-histo {
+            width: 100%;
+            height: 170px;
+            display: block;
+            cursor: pointer;
+            touch-action: none;
+            user-select: none;
         }
     </style>
 </head>
@@ -607,6 +845,79 @@
                     <div class="offsets" id="offsetsContainer"></div>
                 </div>
 
+                <div class="panel" id="harmonyPanel">
+                    <p class="panel-title">
+                        Harmony
+                        <label class="switch">
+                            <input type="checkbox" id="harmonyToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </p>
+
+                    <div class="harmony-body disabled" id="harmonyBody">
+
+                        <div class="harmony-group">
+                            <div class="harmony-group-label">Method</div>
+                            <div class="seg-control" id="methodSeg">
+                                <button data-val="rotational" class="active">Rotational</button>
+                                <button data-val="positional">Fixed shape</button>
+                                <button data-val="autochordal">Autochordal</button>
+                            </div>
+                        </div>
+
+                        <div class="harmony-group" id="chordGroup">
+                            <div class="harmony-group-label" id="chordGroupLabel">Chord criterion (intervallic)</div>
+                            <select id="presetSelect" class="preset-select">
+                                <option value="">— preset —</option>
+                            </select>
+                            <div class="crit-input-row">
+                                <input type="text" id="chordCritInput" value="4 3 3 2" />
+                            </div>
+                            <div class="crit-preview" id="chordPreview"></div>
+                        </div>
+
+                        <div class="harmony-group" id="voiceRoleGroup">
+                            <div class="harmony-group-label" id="voiceRoleLabel">Melody note is voice # (default, applies to all steps)</div>
+                            <div class="voice-count-row">
+                                <input type="range" id="voiceIdxSlider" min="0" max="2" step="1" value="0" />
+                                <span class="num" id="voiceIdxVal">0</span>
+                            </div>
+                            <div class="step-hint">override individual steps below the staff</div>
+                        </div>
+
+                        <div class="harmony-group" id="autochordalGroup" style="display:none;">
+                            <div class="harmony-group-label">Notes per chord</div>
+                            <div class="voice-count-row">
+                                <button id="chordSizeAutoBtn" class="auto-toggle-btn active">Auto</button>
+                                <input type="range" id="chordSizeSlider" min="2" max="8" step="1" value="3" />
+                                <span class="num" id="chordSizeVal">3</span>
+                            </div>
+                            <div class="harmony-group-label" style="margin-top:10px;">Detected chords</div>
+                            <div class="crit-preview" id="autochordalPreview"></div>
+                            <div class="step-hint">chords are re-detected automatically from the melody's pitch content</div>
+                        </div>
+
+                        <div class="harmony-group">
+                            <label style="display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; color:var(--paper-dim); cursor:pointer;">
+                                <input type="checkbox" id="arpeggiateToggle" style="accent-color: var(--brass);" />
+                                arpeggiate chords (n voices = n-tuplet within each step)
+                            </label>
+                            <div class="crit-input-row" id="arpPatternRow" style="display:none; margin-top:8px;">
+                                <span class="harmony-group-label" style="margin:0;">pattern</span>
+                                <select id="arpPatternSelect" class="preset-select" style="width:auto; flex:1;">
+                                    <option value="up">up (low → high)</option>
+                                    <option value="down">down (high → low)</option>
+                                    <option value="updown">up/down (alternate per step)</option>
+                                    <option value="downup">down/up (alternate per step)</option>
+                                    <option value="random">random (reshuffled per step)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="harmony-err" id="harmonyErr"></div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="viz">
@@ -627,12 +938,23 @@
                         <svg id="staff" viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet"></svg>
                     </div>
 
+                    <div class="histo-wrap" id="histoWrap" style="display:none;">
+                        <div class="histo-header">
+                            <span class="histo-title">per-step voice/role overrides — drag or click to paint values</span>
+                            <div class="histo-btns">
+                                <button id="randomizeOverridesBtn" type="button">randomize</button>
+                                <button id="clearAllOverridesBtn" type="button">clear all</button>
+                            </div>
+                        </div>
+                        <svg id="stepHisto" class="step-histo"></svg>
+                    </div>
+
                     <div class="transport">
                         <button class="primary" id="playBtn">▶ Play</button>
                         <span class="space-hint">(spacebar toggles)</span>
                         <div class="field-inline">
-                            tempo <input type="range" id="tempoSlider" min="60" max="360" step="4" value="168" />
-                            <span id="tempoVal">168</span>ms
+                            bpm <input type="range" id="tempoSlider" min="40" max="240" step="1" value="80" />
+                            <span id="tempoVal">80</span> bpm (1 step = 1/8th note)
                         </div>
                         <div class="field-inline">
                             wave
@@ -652,16 +974,248 @@
 
         </div>
 
-        <footer>
-            <span>Click a note dot to hear it. </span>
-            <span style="color:var(--paper-faint);">— based on Slonimsky’s <em>Thesaurus of Scales and Melodic Patterns</em></span>
-        </footer>
-
     </div>
 
     <script>
         (function() {
             "use strict";
+
+            // ─── Slonimsky harmony algebra ─────────────────────────
+            function euclideanDivision(dividend, divisor) {
+                let quotient = Math.trunc(dividend / divisor);
+                let remainder = dividend - quotient * divisor;
+                if (remainder < 0) { quotient -= 1; remainder += divisor; }
+                return { quotient, remainder };
+            }
+            function calcRange(data, modulo) {
+                if (data.length === 0) return modulo;
+                const maxValue = Math.max(...data), minValue = Math.min(...data);
+                const span = maxValue - minValue;
+                const { quotient } = euclideanDivision(span, modulo);
+                return modulo * (quotient + 1);
+            }
+
+            class PositionVector {
+                constructor(data = [0], mod = 12, userRange = 0, rangeUpdate = true, user = false) {
+                    this.data = [...data]; this.mod = mod;
+                    this.userRange = userRange > 0 ? userRange : mod;
+                    this.rangeUpdate = rangeUpdate; this.user = user;
+                    this.range = 0; this.range = this._initializeRange();
+                }
+                _rangeCalculation() { const modulo = this.user ? this.userRange : this.mod; return calcRange(this.data, modulo); }
+                _initializeRange() { return this.rangeUpdate ? this._rangeCalculation() : (this.user ? this.userRange : this.mod); }
+                size() { return this.data.length; }
+                getData() { return [...this.data]; }
+                getMod() { return this.mod; }
+                getUserRange() { return this.userRange; }
+                getRange() { return this.range; }
+                getRangeUpdate() { return this.rangeUpdate; }
+                getUser() { return this.user; }
+                setMod(m) { this.mod = m; if (this.rangeUpdate) this.range = this._rangeCalculation(); }
+                element(index) {
+                    const size = this.data.length;
+                    if (size === 0) return 0;
+                    const div = euclideanDivision(index, size);
+                    const cycles = (index - div.remainder) / size;
+                    return this.data[div.remainder] + Math.abs(this.getRange()) * cycles;
+                }
+                get(index) { return this.element(index); }
+                plusScalar(n) { return new PositionVector(this.data.map(v => v + n), this.mod, this.userRange, this.rangeUpdate, this.user); }
+                rotoTranslate(startOffset, length = 0) {
+                    const outLength = length === 0 ? this.data.length : Math.abs(length);
+                    const newData = new Array(outLength);
+                    for (let i = 0; i < outLength; i++) newData[i] = this.element(startOffset + i);
+                    return new PositionVector(newData, this.mod, this.userRange, this.rangeUpdate, this.user);
+                }
+            }
+
+            class IntervalVector {
+                constructor(data = [0], offset = 0, mod = 12) { this.data = [...data]; this.offset = offset; this.mod = mod; }
+                size() { return this.data.length; }
+                getData() { return [...this.data]; }
+                getOffset() { return this.offset; }
+                getMod() { return this.mod; }
+                setMod(m) { this.mod = m; }
+                element(i) {
+                    if (this.data.length === 0) return 0;
+                    const size = this.data.length;
+                    const div = euclideanDivision(i, size);
+                    return this.data[div.remainder];
+                }
+                get(index) { return this.element(index); }
+                rotate(r, n = 0) {
+                    n = Math.abs(n); if (n === 0) n = this.data.length;
+                    const out = new Array(n);
+                    for (let i = 0; i < n; i++) out[i] = this.element(r + i);
+                    return new IntervalVector(out, this.offset, this.mod);
+                }
+                rotoTranslate(r, n = 0) {
+                    n = Math.abs(n);
+                    const dataSize = this.data.length;
+                    if (n === 0) n = dataSize;
+                    const out = new Array(n);
+                    for (let i = 0; i < n; i++) out[i] = this.element(r + i);
+                    let sum = 0;
+                    if (Math.abs(r) < dataSize) {
+                        if (r >= 0) { for (let i = 0; i < r; i++) sum += this.element(i); }
+                        else { for (let i = 0; i < -r; i++) sum -= this.element(dataSize - 1 - i); }
+                    } else {
+                        const div = euclideanDivision(r, dataSize);
+                        if (r >= 0) {
+                            for (let i = 0; i < dataSize; i++) { const mult = i < div.remainder ? div.quotient + 1 : div.quotient; sum += this.element(i) * mult; }
+                        } else {
+                            const thresh = dataSize + div.remainder;
+                            for (let i = 0; i < dataSize; i++) { const mult = i >= thresh ? div.quotient - 1 : div.quotient; sum += this.element(i) * mult; }
+                        }
+                    }
+                    return new IntervalVector(out, this.offset + sum, this.mod);
+                }
+            }
+
+            function selectPosPos(source, criterion, criterionRotation = 0, voices = 0) {
+                const criterionModulo = source.getData().length;
+                const actualCriterion = new PositionVector(criterion.getData(), criterionModulo);
+                actualCriterion.setMod(source.size());
+                const rotatedCriterion = criterionRotation !== 0 ? actualCriterion.rotoTranslate(criterionRotation, voices) : actualCriterion;
+                const outLength = voices > 0 ? voices : rotatedCriterion.size();
+                const result = new Array(outLength);
+                for (let k = 0; k < outLength; k++) result[k] = source.get(rotatedCriterion.get(k));
+                return new PositionVector(result, source.getMod(), source.getUserRange(), source.getRangeUpdate(), source.getUser());
+            }
+            function selectPosInt(source, criterion, criterionRotation = 0, voices = 0) {
+                let actualCriterion = criterion;
+                actualCriterion.setMod(source.size());
+                const rotatedCriterion = criterionRotation !== 0 ? actualCriterion.rotate(criterionRotation, voices) : actualCriterion;
+                const outLength = voices > 0 ? voices : rotatedCriterion.size();
+                const result = new Array(outLength);
+                let cumulativePosition = rotatedCriterion.getOffset();
+                for (let k = 0; k < outLength; k++) { result[k] = source.get(cumulativePosition); cumulativePosition += rotatedCriterion.get(k); }
+                return new PositionVector(result, source.getMod(), source.getUserRange(), source.getRangeUpdate(), source.getUser());
+            }
+            function select(source, criterion, criterionRotation = 0, voices = 0) {
+                const srcIsPos = source instanceof PositionVector;
+                const critIsPos = criterion instanceof PositionVector;
+                if (srcIsPos && critIsPos) return selectPosPos(source, criterion, criterionRotation, voices);
+                if (srcIsPos && !critIsPos) return selectPosInt(source, criterion, criterionRotation, voices);
+                throw new Error('unsupported select() overload for harmony use case');
+            }
+
+            // Build the diatonic/working scale as a PositionVector over the chromatic universe [0..workingMod)
+            function buildScale(workingMod, scaleCriterion) {
+                const chromatic = new PositionVector(Array.from({ length: workingMod }, (_, i) => i), workingMod);
+                const crit = scaleCriterion.repr === 'positional'
+                    ? new PositionVector(scaleCriterion.data, workingMod)
+                    : new IntervalVector(scaleCriterion.data, 0, workingMod);
+                return select(chromatic, crit);
+            }
+
+            // Find the scale-index whose pitch-class matches degreePc (within one cycle of the scale)
+            function findScaleIndex(scale, degreePc) {
+                const size = scale.size();
+                for (let i = 0; i < size; i++) {
+                    const pc = ((scale.get(i) % scale.getMod()) + scale.getMod()) % scale.getMod();
+                    if (pc === degreePc) return i;
+                }
+                return -1;
+            }
+
+            // Rotational method: harmonize a melody degree (absolute semitone value) as voice `voiceIndex`
+            // of an n-voice chord built by walking `chordCriterion` over `scale`.
+            function harmonizeRotational(scale, degreeSemitone, criterionData, voiceIndex, voices) {
+                const workingMod = scale.getMod();
+                const octaveOffset = Math.floor(degreeSemitone / workingMod) * workingMod;
+                const pc = ((degreeSemitone % workingMod) + workingMod) % workingMod;
+                const idx = findScaleIndex(scale, pc);
+                if (idx === -1) return [degreeSemitone]; // chromatic passing tone: not in scale, leave bare
+
+                const n = voices > 0 ? voices : criterionData.length;
+                const rotated = new IntervalVector(criterionData, 0, workingMod).rotate(voiceIndex, n);
+                const result = new Array(n);
+                let cum = idx;
+                for (let k = 0; k < n; k++) { result[k] = scale.get(cum); cum += rotated.get(k); }
+                return result.map(v => v + octaveOffset);
+            }
+
+            // Positional (fixed-shape) method: place degree at `roleIndex` of a fixed chromatic shape.
+            // roleIndex is always 0..11 (the 12 named roles). Its position in the working space
+            // is roleIndex * (workingMod/12) — i.e. one semitone's worth of working-mod steps.
+            function harmonizePositional(workingMod, degreeSemitone, shapeData, roleIndex) {
+                const octaveOffset = Math.floor(degreeSemitone / workingMod) * workingMod;
+                const pc = ((degreeSemitone % workingMod) + workingMod) % workingMod;
+                const shape = new PositionVector(shapeData, workingMod);
+                const semitoneSteps = workingMod / 12;
+                const roleVal = ((roleIndex % 12) + 12) % 12 * semitoneSteps;
+                const shifted = shape.plusScalar(pc - roleVal).getData().map(v => v + octaveOffset);
+                // The melody note itself is always the intended tone at `roleVal` above the shifted
+                // root, but the shape's own listed intervals may not include that exact offset
+                // (e.g. shape [0,4,10] has no entry at m2). Ensure it's always present so the
+                // melody line is always audible, regardless of the shape's interval content.
+                if (!shifted.includes(degreeSemitone)) shifted.push(degreeSemitone);
+                return shifted;
+            }
+
+            const ROLE_NAMES_12 = ['root','m2','M2','m3','M3','P4','#4','P5','m6','M6','m7','M7'];
+
+            // Autochordal method: treat the melody itself as implying two or more chords —
+            // "a scale made of chords." The melody's distinct pitch-classes are sorted and
+            // dealt alternately (like dealing cards) into N piles, each pile being one chord.
+            // chordSize is either a fixed 2/3/4, or 'auto': the largest chord size in
+            // {4,3,2} that divides the pitch-class count evenly, falling back to size 3
+            // (last chord may be shorter) if none divide evenly.
+            function detectAutochords(result, workingMod, chordSize = 'auto') {
+                const pcSet = [...new Set(result.map(v => ((v % workingMod) + workingMod) % workingMod))].sort((a, b) => a - b);
+                const count = pcSet.length;
+                if (count === 0) return [];
+                let size = chordSize;
+                if (size === 'auto') {
+                    size = 3;
+                    for (const s of [4, 3, 2]) {
+                        if (count % s === 0) { size = s; break; }
+                    }
+                }
+                const numChords = Math.ceil(count / size);
+                const chords = Array.from({ length: numChords }, () => []);
+                pcSet.forEach((pc, i) => chords[i % numChords].push(pc));
+                return chords; // each entry: sorted-ish array of pitch-classes (mod workingMod)
+            }
+
+            // Voice a single melody note against the detected chords: find whichever chord
+            // contains the note's pitch-class, extend that chord's pitch-classes across
+            // octaves, and take the N tones starting at (and including) the melody note
+            // itself going upward — e.g. chord {0,2,7} voicing note 2 gives [2,7,12].
+            function harmonizeAutochordal(chords, degreeSemitone, workingMod) {
+                const pc = ((degreeSemitone % workingMod) + workingMod) % workingMod;
+                const chord = chords.find(c => c.includes(pc));
+                if (!chord || chord.length === 0) return [degreeSemitone]; // shouldn't happen: pc always came from the melody
+                const octaveOffset = Math.floor(degreeSemitone / workingMod) * workingMod;
+                const extended = [];
+                for (let oct = -1; oct <= 2; oct++) {
+                    for (const c of chord) extended.push(c + oct * workingMod + octaveOffset);
+                }
+                extended.sort((a, b) => a - b);
+                const startIdx = extended.indexOf(degreeSemitone);
+                return extended.slice(startIdx, startIdx + chord.length);
+            }
+
+            // Preset criterion-shapes. rotational: intervallic steps (scale-degree jumps in the
+            // chromatic gamut). positional: fixed chromatic shape (semitones from shape-root).
+            // Either field may be null if a preset doesn't have a natural equivalent for that method.
+            const HARMONY_PRESETS = [
+                { name: 'Major triad',        rotational: [4,3,5],     positional: [0,4,7] },
+                { name: 'Minor triad',        rotational: [3,4,5],     positional: [0,3,7] },
+                { name: 'Diminished triad',   rotational: [3,3,6],     positional: [0,3,6] },
+                { name: 'Augmented triad',    rotational: [4,4,4],     positional: [0,4,8] },
+                { name: 'Dominant 7th',       rotational: [4,3,3,2],   positional: [0,4,7,10] },
+                { name: 'Major 7th',          rotational: [4,3,4,1],   positional: [0,4,7,11] },
+                { name: 'Minor 7th',          rotational: [3,4,3,2],   positional: [0,3,7,10] },
+                { name: 'Half-dim 7th',       rotational: [3,3,4,2],   positional: [0,3,6,10] },
+                { name: 'Diminished 7th',     rotational: [3,3,3,3],   positional: [0,3,6,9] },
+                { name: 'Sus2',               rotational: [2,5,5],     positional: [0,2,7] },
+                { name: 'Sus4',               rotational: [5,2,5],     positional: [0,5,7] },
+                { name: 'Add9',               rotational: [4,3,2,3],   positional: [0,4,7,14] },
+                { name: 'Whole-tone (4 voice)', rotational: [2,2,2,6], positional: [0,2,4,6] },
+                { name: 'Quartal (4ths)',     rotational: [5,5,5],     positional: [0,5,10] },
+            ];
 
             // ─── Core algorithms ──────────────────────────────────
             function baseSequence(n, d) {
@@ -776,107 +1330,160 @@
             }
 
             // ─── Operation registry ──────────────────────────────
+            // offsets[].order: 'asc' = k1 < k2 < ... < km enforced; 'desc' = reverse enforced;
+            // 'free' = any order valid (single values, or infrapolation's k under permutation σ).
             const OPS = {
                 interpolation: {
                     label: "Interpolation",
                     tip: "Inserts notes above each step before moving to the next.",
-                    desc: "(xᵢ, xᵢ+k₀, …, xᵢ+kₘ). k is variadic.",
-                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    desc: "(xᵢ, xᵢ+k₀, …, xᵢ+kₘ). k is variadic, k₁ < k₂ < ⋯ < kₘ.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [1], order: 'asc' }],
                     run: (x, o) => interpolation(x, o.k)
                 },
                 symmetricInterpolation: {
                     label: "Symmetric Interpolation",
                     tip: "Mirrors upper/lower infixes across each pair of steps.",
-                    desc: "Alternates upper/lower infixes pair by pair, symmetric about the pair's midpoint.",
-                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    desc: "Alternates upper/lower infixes pair by pair, symmetric about the pair's midpoint. k₁ < k₂ < ⋯ < kₘ.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [1], order: 'asc' }],
                     run: (x, o) => symmetricInterpolation(x, o.k)
                 },
                 asymmetricInterpolation: {
                     label: "Asymmetric Interpolation",
                     tip: "Upper (k) and lower (l) offsets are linked as pairs.",
-                    desc: "Each pair (kᵢ, lᵢ) adds one upper and one lower offset. Both arrays are padded to the same length automatically.",
-                    offsets: [{ group: 'k', variadic: true, defaults: [3] }, { group: 'l', variadic: true, defaults: [2] }],
+                    desc: "Each pair (kᵢ, lᵢ) adds one upper and one lower offset. k₁ < k₂ < ⋯ < kₘ; ℓₘ < ⋯ < ℓ₂ < ℓ₁. Both arrays are padded to the same length automatically.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [1], order: 'asc' }, { group: 'l', variadic: true, defaults: [2], order: 'desc' }],
                     run: (x, o) => asymmetricInterpolation(x, o.k, o.l)
                 },
                 ultrapolation: {
                     label: "Ultrapolation",
                     tip: "Extends past each step instead of filling between steps.",
-                    desc: "(xᵢ+kₘ, …, xᵢ+k₀, xᵢ). k is variadic.",
-                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    desc: "(xᵢ+kₘ, …, xᵢ+k₀, xᵢ). k is variadic, k₁ < k₂ < ⋯ < kₘ.",
+                    offsets: [{ group: 'k', variadic: true, defaults: [1], order: 'asc' }],
                     run: (x, o) => ultrapolation(x, o.k)
                 },
                 infrapolation: {
                     label: "Infrapolation",
                     tip: "Inserts notes below each step before moving to the next.",
-                    desc: "(xᵢ, xᵢ−k₀, …, xᵢ−kₘ). k is variadic.",
-                    offsets: [{ group: 'k', variadic: true, defaults: [3] }],
+                    desc: "(xᵢ, xᵢ−k₀, …, xᵢ−kₘ). k is variadic, any order (kσ(1) < ⋯ < kσ(m) for some permutation σ).",
+                    offsets: [{ group: 'k', variadic: true, defaults: [1], order: 'free' }],
                     run: (x, o) => infrapolation(x, o.k)
                 },
                 infraInterpolation: {
                     label: "Infra-Interpolation",
                     tip: "Lower neighbor then upper neighbor at every step.",
                     desc: "(xᵢ, xᵢ−k, xᵢ+l) at every step.",
-                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [3] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }],
                     run: (x, o) => infraInterpolation(x, o.k[0], o.l[0])
                 },
                 interInfrapolation: {
                     label: "Inter-Infrapolation",
                     tip: "Upper neighbor then lower neighbor at every step.",
                     desc: "(xᵢ, xᵢ+k, xᵢ−l) at every step.",
-                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [2] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }],
                     run: (x, o) => interInfrapolation(x, o.k[0], o.l[0])
                 },
                 infraUltrapolation: {
                     label: "Infra-Ultrapolation",
                     tip: "Lower neighbor at the start, alternating through to upper at the end.",
                     desc: "Lower (k) at the first step, alternating upper (l) / lower (k) through the middle, upper (l) at the last step.",
-                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [4] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }],
                     run: (x, o) => infraUltrapolation(x, o.k[0], o.l[0])
                 },
                 interUltrapolation: {
                     label: "Inter-Ultrapolation",
                     tip: "Upper neighbor of this step, lower neighbor of the next.",
                     desc: "(xᵢ, xᵢ+k, xᵢ₊₁−l).",
-                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [2] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }],
                     run: (x, o) => interUltrapolation(x, o.k[0], o.l[0])
                 },
                 ultraInterpolation: {
                     label: "Ultra-Interpolation",
                     tip: "Upper neighbor of the next step, then upper neighbor of this one.",
                     desc: "(xᵢ, xᵢ₊₁+k, xᵢ+l).",
-                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [1] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }],
                     run: (x, o) => ultraInterpolation(x, o.k[0], o.l[0])
                 },
                 infraInterUltrapolation: {
                     label: "Infra-Inter-Ultrapolation",
                     tip: "Chains lower, upper, and next-step-upper neighbors in one pass.",
                     desc: "(xᵢ, xᵢ−k, xᵢ+l, xᵢ₊₁+m) — all three families chained at once.",
-                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [3] }, { group: 'm', variadic: false, defaults: [1] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }, { group: 'm', variadic: false, defaults: [1] }],
                     run: (x, o) => infraInterUltrapolation(x, o.k[0], o.l[0], o.m[0])
                 },
                 interInfraInterpolation: {
                     label: "Inter-Infra-Interpolation",
                     tip: "Rare composite: next-step-lower, then lower, then upper.",
                     desc: "(xᵢ, xᵢ₊₁−k, xᵢ−l, xᵢ+m) — appears once in the Thesaurus.",
-                    offsets: [{ group: 'k', variadic: false, defaults: [2] }, { group: 'l', variadic: false, defaults: [3] }, { group: 'm', variadic: false, defaults: [1] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }, { group: 'm', variadic: false, defaults: [1] }],
                     run: (x, o) => interInfraInterpolation(x, o.k[0], o.l[0], o.m[0])
                 },
                 ultraInfraInterpolation: {
                     label: "Ultra-Infra-Interpolation",
                     tip: "Rare composite: next-step-upper, then lower, then upper.",
                     desc: "(xᵢ, xᵢ₊₁+k, xᵢ−l, xᵢ+m) — appears once in the Thesaurus.",
-                    offsets: [{ group: 'k', variadic: false, defaults: [3] }, { group: 'l', variadic: false, defaults: [2] }, { group: 'm', variadic: false, defaults: [1] }],
+                    offsets: [{ group: 'k', variadic: false, defaults: [1] }, { group: 'l', variadic: false, defaults: [1] }, { group: 'm', variadic: false, defaults: [1] }],
                     run: (x, o) => ultraInfraInterpolation(x, o.k[0], o.l[0], o.m[0])
                 }
             };
+
+            // Produces a per-step overrides object that behaves like a plain {} for reads,
+            // writes, and deletes, but for any step index that was never explicitly set,
+            // reports a default alternating between 0 (even steps) and 1 (odd steps)
+            // instead of undefined. Explicit assignment/deletion works normally on top of it.
+            function makeAlternatingOverrides() {
+                const store = {};
+                return new Proxy(store, {
+                    get(target, prop) {
+                        if (prop in target) return target[prop];
+                        if (typeof prop === 'string' && /^\d+$/.test(prop)) {
+                            return parseInt(prop, 10) % 2 === 0 ? 0 : 1;
+                        }
+                        return target[prop];
+                    },
+                    set(target, prop, value) { target[prop] = value; return true; },
+                    deleteProperty(target, prop) { delete target[prop]; return true; },
+                    has(target, prop) { return prop in target; },
+                });
+            }
+
+            // Same idea, but every unset step defaults to the same fixed value rather than
+            // alternating — used for the positional/role method, where the override is a role
+            // index (0-11) and alternating 0/1 would mean alternating 'root'/'m2', not useful.
+            function makeConstantOverrides(defaultVal) {
+                const store = {};
+                return new Proxy(store, {
+                    get(target, prop) {
+                        if (prop in target) return target[prop];
+                        if (typeof prop === 'string' && /^\d+$/.test(prop)) {
+                            return defaultVal;
+                        }
+                        return target[prop];
+                    },
+                    set(target, prop, value) { target[prop] = value; return true; },
+                    deleteProperty(target, prop) { delete target[prop]; return true; },
+                    has(target, prop) { return prop in target; },
+                });
+            }
 
             // ─── State & cache ────────────────────────────────────
             const state = {
                 n: 1, d: 2, root: 60,
                 op: 'interpolation',
-                offsetValues: { k: [3], l: [2], m: [1] },
-                tempo: 168,
+                offsetValues: { k: [1], l: [1], m: [1] },
+                // When true for a group, enforceOrder is skipped for that group — set by
+                // dragging to permute two offsets, cleared again once a slider is edited.
+                orderSuspended: { k: false, l: false, m: false },
+                bpm: 80,
                 wave: 'triangle',
+                harmony: {
+                    enabled: false,
+                    method: 'rotational',           // 'rotational' | 'positional' | 'autochordal'
+                    rotational: { chordData: [4,3,5], voiceIndex: 0, voiceIndexTouched: false, voiceOverrides: makeAlternatingOverrides() },
+                    positional: { chordData: [0,4,10], roleIndex: 2, roleOverrides: makeConstantOverrides(2) },
+                    autochordal: { chordSize: 'auto' },  // 'auto' | 2 | 3 | 4 — everything else is derived from the melody
+                    arpeggiate: false,
+                    arpPattern: 'up',                 // 'up' | 'down' | 'updown' | 'downup' | 'random'
+                },
             };
 
             const opCache = {};
@@ -903,6 +1510,32 @@
             const tempoSlider = document.getElementById('tempoSlider');
             const tempoVal = document.getElementById('tempoVal');
             const waveSelect = document.getElementById('waveSelect');
+
+            const harmonyToggle = document.getElementById('harmonyToggle');
+            const harmonyBody = document.getElementById('harmonyBody');
+            const methodSeg = document.getElementById('methodSeg');
+            const chordGroup = document.getElementById('chordGroup');
+            const chordGroupLabel = document.getElementById('chordGroupLabel');
+            const chordCritInput = document.getElementById('chordCritInput');
+            const presetSelect = document.getElementById('presetSelect');
+            const chordPreview = document.getElementById('chordPreview');
+            const voiceRoleGroup = document.getElementById('voiceRoleGroup');
+            const voiceRoleLabel = document.getElementById('voiceRoleLabel');
+            const voiceIdxSlider = document.getElementById('voiceIdxSlider');
+            const voiceIdxVal = document.getElementById('voiceIdxVal');
+            const autochordalGroup = document.getElementById('autochordalGroup');
+            const chordSizeAutoBtn = document.getElementById('chordSizeAutoBtn');
+            const chordSizeSlider = document.getElementById('chordSizeSlider');
+            const chordSizeVal = document.getElementById('chordSizeVal');
+            const autochordalPreview = document.getElementById('autochordalPreview');
+            const harmonyErr = document.getElementById('harmonyErr');
+            const arpeggiateToggle = document.getElementById('arpeggiateToggle');
+            const arpPatternRow = document.getElementById('arpPatternRow');
+            const arpPatternSelect = document.getElementById('arpPatternSelect');
+            const histoWrap = document.getElementById('histoWrap');
+            const stepHisto = document.getElementById('stepHisto');
+            const clearAllOverridesBtn = document.getElementById('clearAllOverridesBtn');
+            const randomizeOverridesBtn = document.getElementById('randomizeOverridesBtn');
 
             const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
             function midiName(m) {
@@ -964,6 +1597,7 @@
                             l: loaded.l.slice(),
                             m: loaded.m.slice(),
                         };
+                        state.orderSuspended = { k: false, l: false, m: false };
                         buildModeList();
                         buildOffsetsUI();
                         render();
@@ -974,6 +1608,122 @@
             buildModeList();
 
             // ─── Offsets UI ───────────────────────────────────────
+            // Sorts arr in place to satisfy a strict order ('asc' or 'desc') within the slider's
+            // [-12, 12] range. Preserves relative spacing between values where possible; only
+            // compresses spacing in the degenerate case where the range can't fit that many
+            // strictly-distinct integers. Strict inequality rules out any k_i = k_j.
+            function enforceOrder(arr, direction) {
+                const lo = -12, hi = 12;
+                const asc = direction === 'asc';
+                const n = arr.length;
+                const sorted = [...arr].sort((a, b) => asc ? a - b : b - a);
+
+                const out = new Array(n);
+                out[0] = Math.max(lo, Math.min(hi, sorted[0]));
+                for (let i = 1; i < n; i++) {
+                    const clamped = Math.max(lo, Math.min(hi, sorted[i]));
+                    out[i] = asc ? Math.max(clamped, out[i-1] + 1) : Math.min(clamped, out[i-1] - 1);
+                }
+                const overflow = asc ? out[n-1] - hi : lo - out[n-1];
+                if (overflow > 0) for (let i = 0; i < n; i++) out[i] += asc ? -overflow : overflow;
+                for (let i = 0; i < n; i++) out[i] = Math.max(lo, Math.min(hi, out[i]));
+                for (let i = 1; i < n; i++) {
+                    if (asc && out[i] <= out[i-1]) out[i] = out[i-1] + 1;
+                    if (!asc && out[i] >= out[i-1]) out[i] = out[i-1] - 1;
+                }
+                for (let i = 0; i < n; i++) arr[i] = out[i];
+            }
+
+            // Drag-and-drop permutation: dragging one offset row onto another swaps their two
+            // values in place (a transposition), rather than reordering the whole list. This
+            // lets the user intentionally break an enforced asc/desc order to get a specific
+            // permutation of the inserted-note offsets — which also reshapes the appended
+            // retrograde, since the retrograde is derived from the already-computed sequence.
+            let dragSrc = null;
+            function attachPermuteDragHandlers(dropZoneEl, handleEl, group) {
+                handleEl.addEventListener('dragstart', (e) => {
+                    dragSrc = { group, idx: parseInt(dropZoneEl.dataset.idx, 10) };
+                    dropZoneEl.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    try { e.dataTransfer.setData('text/plain', ''); } catch (_) {}
+                });
+                handleEl.addEventListener('dragend', () => {
+                    dropZoneEl.classList.remove('dragging');
+                    document.querySelectorAll('.drag-over').forEach(n => n.classList.remove('drag-over'));
+                    dragSrc = null;
+                });
+                dropZoneEl.addEventListener('dragover', (e) => {
+                    if (!dragSrc || dragSrc.group !== group) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    dropZoneEl.classList.add('drag-over');
+                });
+                dropZoneEl.addEventListener('dragleave', () => dropZoneEl.classList.remove('drag-over'));
+                dropZoneEl.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZoneEl.classList.remove('drag-over');
+                    if (!dragSrc || dragSrc.group !== group) return;
+                    const targetIdx = parseInt(dropZoneEl.dataset.idx, 10);
+                    permuteOffsets(group, dragSrc.idx, targetIdx);
+                    dragSrc = null;
+                });
+            }
+
+            // Updates every slider/number in a group to match `arr`, without touching (and
+            // thus without interrupting) whichever input currently has focus — that's the one
+            // the user is actively dragging. Used after enforceOrder reshuffles ranks mid-drag.
+            function patchGroupRows(group, arr) {
+                const rows = offsetsContainer.querySelectorAll('.offset-row.' + group);
+                rows.forEach((row, i) => {
+                    const input = row.querySelector('input');
+                    const num = row.querySelector('.num');
+                    if (document.activeElement === input) return;
+                    const v = arr[i];
+                    if (input.value != v) input.value = v;
+                    num.textContent = v;
+                });
+            }
+
+            // Same idea for the linked k/l pair rows in Asymmetric Interpolation.
+            function patchPairRows(kArr, lArr) {
+                const rows = offsetsContainer.querySelectorAll('.pair-row');
+                rows.forEach((row, i) => {
+                    const kInput = row.querySelector('.half:not(.l) input');
+                    const kNum = row.querySelector('.half:not(.l) .num');
+                    const lInput = row.querySelector('.half.l input');
+                    const lNum = row.querySelector('.half.l .num');
+                    if (document.activeElement !== kInput) {
+                        if (kInput.value != kArr[i]) kInput.value = kArr[i];
+                        kNum.textContent = kArr[i];
+                    }
+                    if (document.activeElement !== lInput) {
+                        if (lInput.value != lArr[i]) lInput.value = lArr[i];
+                        lNum.textContent = lArr[i];
+                    }
+                });
+            }
+
+            // Swaps the values at indices a and b within a variadic group (or, for group
+            // 'pair', swaps both linked k/l values of an asymmetric-interpolation pair
+            // together). Suspends order enforcement for the affected group(s) so the swap
+            // sticks until the user next edits a slider by hand.
+            function permuteOffsets(group, a, b) {
+                if (a === b) return;
+                if (group === 'pair') {
+                    const kArr = state.offsetValues.k, lArr = state.offsetValues.l;
+                    [kArr[a], kArr[b]] = [kArr[b], kArr[a]];
+                    [lArr[a], lArr[b]] = [lArr[b], lArr[a]];
+                    state.orderSuspended.k = true;
+                    state.orderSuspended.l = true;
+                } else {
+                    const arr = state.offsetValues[group];
+                    [arr[a], arr[b]] = [arr[b], arr[a]];
+                    state.orderSuspended[group] = true;
+                }
+                buildOffsetsUI();
+                render();
+            }
+
             function buildOffsetsUI() {
                 offsetsContainer.innerHTML = '';
                 const spec = OPS[state.op].offsets;
@@ -984,12 +1734,31 @@
                     const lArr = state.offsetValues.l;
                     while (kArr.length < lArr.length) kArr.push(kArr.length ? kArr[kArr.length-1] : 1);
                     while (lArr.length < kArr.length) lArr.push(lArr.length ? lArr[lArr.length-1] : 1);
+                    const kOrderActive = !state.orderSuspended.k;
+                    const lOrderActive = !state.orderSuspended.l;
+                    if (kOrderActive) enforceOrder(kArr, 'asc');
+                    if (lOrderActive) enforceOrder(lArr, 'desc');
                     const len = kArr.length;
                     const minCount = 1;
 
                     for (let i = 0; i < len; i++) {
                         const pairDiv = document.createElement('div');
                         pairDiv.className = 'pair-row';
+                        if (len > 1) {
+                            pairDiv.classList.add('draggable');
+                            pairDiv.dataset.group = 'pair';
+                            pairDiv.dataset.idx = i;
+                        }
+
+                        let handle = null;
+                        if (len > 1) {
+                            handle = document.createElement('span');
+                            handle.className = 'drag-handle pair-handle';
+                            handle.title = 'Drag to permute this pair with another';
+                            handle.textContent = '⠿';
+                            handle.draggable = true;
+                            pairDiv.appendChild(handle);
+                        }
 
                         const kHalf = document.createElement('div');
                         kHalf.className = 'half';
@@ -1003,6 +1772,9 @@
                         kInput.addEventListener('input', () => {
                             kArr[i] = parseInt(kInput.value, 10);
                             kNum.textContent = kArr[i];
+                            state.orderSuspended.k = false;
+                            enforceOrder(kArr, 'asc');
+                            patchPairRows(kArr, lArr);
                             render();
                         });
                         pairDiv.appendChild(kHalf);
@@ -1019,10 +1791,14 @@
                         lInput.addEventListener('input', () => {
                             lArr[i] = parseInt(lInput.value, 10);
                             lNum.textContent = lArr[i];
+                            state.orderSuspended.l = false;
+                            enforceOrder(lArr, 'desc');
+                            patchPairRows(kArr, lArr);
                             render();
                         });
                         pairDiv.appendChild(lHalf);
 
+                        if (handle) attachPermuteDragHandlers(pairDiv, handle, 'pair');
                         offsetsContainer.appendChild(pairDiv);
                     }
 
@@ -1034,7 +1810,11 @@
                         const lastK = kArr.length ? kArr[kArr.length-1] : 1;
                         const lastL = lArr.length ? lArr[lArr.length-1] : 1;
                         kArr.push(lastK + 1);
-                        lArr.push(lastL + 1);
+                        lArr.push(lastL - 1);
+                        state.orderSuspended.k = false;
+                        state.orderSuspended.l = false;
+                        enforceOrder(kArr, 'asc');
+                        enforceOrder(lArr, 'desc');
                         buildOffsetsUI();
                         render();
                     });
@@ -1067,6 +1847,9 @@
                         state.offsetValues[group.group] = group.defaults.slice();
                     }
                     const arr = state.offsetValues[group.group];
+                    const orderActive = group.variadic && group.order && group.order !== 'free'
+                        && !state.orderSuspended[group.group];
+                    if (orderActive) enforceOrder(arr, group.order);
                     totalCount += arr.length;
                     const minCount = 1;
 
@@ -1074,7 +1857,14 @@
                         const row = document.createElement('div');
                         row.className = 'offset-row ' + group.group;
                         const label = group.variadic ? (group.group + (idx + 1)) : group.group;
+                        const isDraggable = group.variadic && arr.length > 1;
+                        if (isDraggable) {
+                            row.classList.add('draggable');
+                            row.dataset.group = group.group;
+                            row.dataset.idx = idx;
+                        }
                         row.innerHTML = `
+                            ${isDraggable ? '<span class="drag-handle" title="Drag to permute with another offset" draggable="true">⠿</span>' : ''}
                             <span class="tag">${label}</span>
                             <input type="range" min="-12" max="12" step="1" value="${val}">
                             <span class="num">${val}</span>
@@ -1084,8 +1874,21 @@
                         input.addEventListener('input', () => {
                             arr[idx] = parseInt(input.value, 10);
                             num.textContent = arr[idx];
+                            if (group.variadic && group.order && group.order !== 'free') {
+                                // Manually editing a value resumes normal ordering for this group.
+                                state.orderSuspended[group.group] = false;
+                                enforceOrder(arr, group.order);
+                                // Patch every row's value in place rather than rebuilding the DOM
+                                // (a full rebuild would destroy the input the user is actively
+                                // dragging mid-gesture, breaking a smooth drag).
+                                patchGroupRows(group.group, arr);
+                            }
                             render();
                         });
+                        if (isDraggable) {
+                            const handle = row.querySelector('.drag-handle');
+                            attachPermuteDragHandlers(row, handle, group.group);
+                        }
                         offsetsContainer.appendChild(row);
                     });
 
@@ -1097,6 +1900,10 @@
                         addBtn.addEventListener('click', () => {
                             const last = arr[arr.length - 1] ?? 1;
                             arr.push(last + 1);
+                            if (group.order && group.order !== 'free') {
+                                state.orderSuspended[group.group] = false;
+                                enforceOrder(arr, group.order);
+                            }
                             buildOffsetsUI();
                             render();
                         });
@@ -1132,17 +1939,74 @@
                 };
                 let result;
                 try { result = spec.run(base, opts); } catch (_) { result = base.slice(); }
+                // Append the retrograde: the sequence reversed, excluding its own last element
+                // (which is the turnaround point already present), e.g. 0 1 6 7 12 -> 0 1 6 7 12 7 6 1 0.
+                if (result.length > 1) {
+                    const retrograde = result.slice(0, -1).reverse();
+                    result = result.concat(retrograde);
+                }
                 return { base, result };
             }
 
             function isBaseNote(val, base) { return base.includes(val); }
+
+            // ─── Harmony computation ────────────────────────────────
+            // Returns { chords: number[][] , error: string|null } — chords[i] is the array of
+            // semitone offsets (from root) sounding for result[i]; chords[i][0] is always
+            // the melody note itself is NOT guaranteed first — root/tonic-relationship varies
+            // by method, so consumers should treat chords[i] as an unordered tone set.
+            function computeHarmony(result) {
+                const h = state.harmony;
+                if (!h.enabled) return { chords: result.map(v => [v]), error: null };
+
+                const workingMod = 12 * state.n;
+                try {
+                    if (h.method === 'rotational') {
+                        const scale = new PositionVector(Array.from({ length: workingMod }, (_, i) => i), workingMod);
+                        const { chordData, voiceIndex, voiceIndexTouched, voiceOverrides } = h.rotational;
+                        const voices = chordData.length;
+                        const chords = result.map((v, i) => {
+                            const vi = (i in voiceOverrides) ? voiceOverrides[i]
+                                : (voiceIndexTouched ? voiceIndex : voiceOverrides[i]); // untouched: proxy's alternating fallback
+                            return harmonizeRotational(scale, v, chordData, vi, voices);
+                        });
+                        return { chords, error: null };
+                    } else if (h.method === 'positional') {
+                        const { chordData, roleIndex, roleOverrides } = h.positional;
+                        const chords = result.map((v, i) => {
+                            const ri = (i in roleOverrides) ? roleOverrides[i] : roleIndex;
+                            return harmonizePositional(workingMod, v, chordData, ri);
+                        });
+                        return { chords, error: null };
+                    } else {
+                        const detected = detectAutochords(result, workingMod, h.autochordal.chordSize);
+                        const chords = result.map(v => harmonizeAutochordal(detected, v, workingMod));
+                        return { chords, error: null, detected };
+                    }
+                } catch (e) {
+                    return { chords: result.map(v => [v]), error: 'harmony error: ' + e.message };
+                }
+            }
 
             // ─── Render ───────────────────────────────────────────
             let lastRender = null;
 
             function render() {
                 const { base, result } = computeSequence();
-                lastRender = { base, result };
+                const { chords, error, detected } = computeHarmony(result);
+                lastRender = { base, result, chords, detected };
+                harmonyErr.textContent = error || '';
+                if (state.harmony.method === 'autochordal') {
+                    const workingMod = 12 * state.n;
+                    const pcCount = new Set(result.map(v => ((v % workingMod) + workingMod) % workingMod)).size;
+                    syncChordSizeRange(pcCount);
+                    if (state.harmony.enabled) {
+                        autochordalPreview.textContent = (detected || [])
+                            .map(c => '[' + c.join(' ') + ']')
+                            .join('  ·  ') + (detected && detected.length ? '  (mod ' + workingMod + ')' : '');
+                    }
+                }
+                syncStepSliders(result.length);
 
                 baseSeqLabel.textContent = 'base: ' + base.join(' · ');
                 const minInt = Math.min(...intervalsOf(result));
@@ -1151,9 +2015,10 @@
                 metaMinInterval.textContent = minInt;
                 metaSpan.textContent = span;
 
+                const allChordTones = state.harmony.enabled ? chords.flat() : [];
                 const padX = 48, padY = 22;
-                const minV = Math.min(...result, ...base);
-                const maxV = Math.max(...result, ...base);
+                const minV = Math.min(...result, ...base, ...allChordTones);
+                const maxV = Math.max(...result, ...base, ...allChordTones);
                 const vRange = Math.max(1, maxV - minV);
                 const noteSpacing = 50;
                 const vw = padX * 2 + noteSpacing * (result.length - 1) + 20;
@@ -1210,6 +2075,19 @@
                     const label = el('text', { x, y: y - (baseNote ? 14 : 11), class: 'note-label' });
                     label.textContent = v;
                     svg.appendChild(label);
+
+                    if (state.harmony.enabled) {
+                        const chordTones = chords[i] || [];
+                        chordTones.forEach((ct, ci) => {
+                            if (ct === v) return; // melody tone already drawn above
+                            const cdot = el('circle', {
+                                cx: x, cy: yFor(ct), r: 3.6,
+                                class: 'note-dot chord-tone' + (ci === 0 ? ' chord-root' : ''),
+                                'data-idx': i, 'data-val': ct
+                            });
+                            svg.appendChild(cdot);
+                        });
+                    }
                 });
 
                 seqReadout.innerHTML = 'sequence (semitones from root): ' +
@@ -1241,6 +2119,39 @@
                 osc.stop(t0 + duration + 0.02);
             }
 
+            // Returns the arpeggio direction ('up' or 'down') for a given step index,
+            // resolving the alternating patterns against the step's position in the sequence.
+            function arpDirectionForStep(pattern, stepIdx) {
+                if (pattern === 'down') return 'down';
+                if (pattern === 'updown') return stepIdx % 2 === 0 ? 'up' : 'down';
+                if (pattern === 'downup') return stepIdx % 2 === 0 ? 'down' : 'up';
+                return 'up';
+            }
+
+            // Plays a set of semitone offsets (from root) as one step: block chord or arpeggiated.
+            // stepIdx (0-based position in the sequence) drives updown/downup alternation and
+            // defaults to 0, which is correct for single-step previews (e.g. clicking a note).
+            function playChord(tones, stepSec, whenOffset, stepIdx = 0) {
+                if (state.harmony.enabled && state.harmony.arpeggiate && tones.length > 1) {
+                    let ordered = [...tones].sort((a, b) => a - b); // low -> high by actual pitch
+                    if (state.harmony.arpPattern === 'random') {
+                        ordered = [...ordered];
+                        for (let i = ordered.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+                        }
+                    } else if (arpDirectionForStep(state.harmony.arpPattern, stepIdx) === 'down') {
+                        ordered.reverse();
+                    }
+                    const slice = stepSec / ordered.length; // n voices -> n-tuplet filling the step
+                    ordered.forEach((t, i) => {
+                        playNote(midiToFreq(state.root + t), slice * 0.92, whenOffset + i * slice);
+                    });
+                } else {
+                    tones.forEach(t => playNote(midiToFreq(state.root + t), stepSec * 0.92, whenOffset));
+                }
+            }
+
             function highlightNote(idx) {
                 staffSvg.querySelectorAll('.note-dot').forEach(d => d.classList.remove('active'));
                 const dot = staffSvg.querySelector(`.note-dot[data-idx="${idx}"]`);
@@ -1263,14 +2174,15 @@
                 playBtn.classList.add('playing');
                 playBtn.textContent = '■ Stop';
 
-                const { result } = lastRender ?? computeSequence();
-                const stepMs = state.tempo;
+                const rendered = lastRender ?? { ...computeSequence(), chords: null };
+                const result = rendered.result;
+                const chords = rendered.chords || result.map(v => [v]);
+                const stepMs = 60000 / state.bpm / 2; // one step = one 8th note
                 const stepSec = stepMs / 1000;
 
                 for (let i = 0; i < result.length; i++) {
                     if (playToken !== myToken) return;
-                    const freq = midiToFreq(state.root + result[i]);
-                    playNote(freq, stepSec * 0.92, 0);
+                    playChord(chords[i], stepSec, 0, i);
                     highlightNote(i);
                     await new Promise(r => setTimeout(r, stepMs));
                     if (playToken !== myToken) return;
@@ -1281,11 +2193,16 @@
             staffSvg.addEventListener('click', (e) => {
                 const dot = e.target.closest('.note-dot');
                 if (!dot) return;
-                const val = parseInt(dot.getAttribute('data-val'), 10);
+                const idx = parseInt(dot.getAttribute('data-idx'), 10);
                 ensureAudio();
-                playNote(midiToFreq(state.root + val), 0.5, 0);
-                dot.classList.add('active');
-                setTimeout(() => dot.classList.remove('active'), 250);
+                const tones = (state.harmony.enabled && lastRender && lastRender.chords)
+                    ? lastRender.chords[idx]
+                    : [parseInt(dot.getAttribute('data-val'), 10)];
+                playChord(tones, 0.5, 0, idx);
+                staffSvg.querySelectorAll(`.note-dot[data-idx="${idx}"]`).forEach(d => d.classList.add('active'));
+                setTimeout(() => {
+                    staffSvg.querySelectorAll(`.note-dot[data-idx="${idx}"]`).forEach(d => d.classList.remove('active'));
+                }, 250);
             });
 
             // ─── Spacebar shortcut ───────────────────────────────
@@ -1323,6 +2240,7 @@
                     l: defs.l.slice(),
                     m: defs.m.slice(),
                 };
+                state.orderSuspended = { k: false, l: false, m: false };
                 opCache[state.op] = {
                     k: defs.k.slice(),
                     l: defs.l.slice(),
@@ -1333,13 +2251,414 @@
             });
 
             tempoSlider.addEventListener('input', () => {
-                state.tempo = parseInt(tempoSlider.value, 10);
-                tempoVal.textContent = state.tempo;
+                state.bpm = parseInt(tempoSlider.value, 10);
+                tempoVal.textContent = state.bpm;
             });
             waveSelect.addEventListener('change', () => {
                 state.wave = waveSelect.value;
             });
             playBtn.addEventListener('click', playSequence);
+
+            // ─── Harmony panel wiring ───────────────────────────────
+            function parseCritInput(str) {
+                const parts = str.trim().split(/\s+/).filter(Boolean).map(Number);
+                if (parts.length === 0 || parts.some(isNaN)) return null;
+                return parts;
+            }
+
+            function activeHarmonySettings() {
+                return state.harmony[state.harmony.method];
+            }
+
+            // Current value shown/edited by the slider: the selected step's override if one is
+            // selected and set, otherwise the global default.
+            function globalDefaultValue() {
+                const h = state.harmony, s = activeHarmonySettings();
+                return h.method === 'rotational' ? s.voiceIndex : s.roleIndex;
+            }
+
+            function setGlobalDefaultValue(val) {
+                const h = state.harmony, s = activeHarmonySettings();
+                if (h.method === 'rotational') { s.voiceIndex = val; s.voiceIndexTouched = true; }
+                else s.roleIndex = val;
+            }
+
+            // Effective value for step i: its override if set, else the global default —
+            // except in rotational mode, before the user has ever touched the global slider,
+            // where unset steps keep the classic alternating 0/1 voice pattern (the
+            // voiceOverrides proxy's own built-in fallback) rather than collapsing to a flat 0.
+            function stepEffectiveValue(stepIdx) {
+                const h = state.harmony, s = activeHarmonySettings();
+                const overrides = h.method === 'rotational' ? s.voiceOverrides : s.roleOverrides;
+                if (stepIdx in overrides) return overrides[stepIdx];
+                if (h.method === 'rotational' && !s.voiceIndexTouched) return overrides[stepIdx]; // proxy's alternating fallback
+                return globalDefaultValue();
+            }
+
+            function setStepOverride(stepIdx, val) {
+                const s = activeHarmonySettings();
+                const overrides = state.harmony.method === 'rotational' ? s.voiceOverrides : s.roleOverrides;
+                overrides[stepIdx] = val;
+            }
+
+            function clearStepOverride(stepIdx) {
+                const s = activeHarmonySettings();
+                const overrides = state.harmony.method === 'rotational' ? s.voiceOverrides : s.roleOverrides;
+                delete overrides[stepIdx];
+            }
+
+            function populatePresets() {
+                const isRotational = state.harmony.method === 'rotational';
+                presetSelect.innerHTML = '<option value="">— preset —</option>';
+                HARMONY_PRESETS.forEach((p, i) => {
+                    const shape = isRotational ? p.rotational : p.positional;
+                    if (!shape) return;
+                    const opt = document.createElement('option');
+                    opt.value = String(i);
+                    opt.textContent = p.name + ' (' + shape.join(' ') + ')';
+                    presetSelect.appendChild(opt);
+                });
+            }
+
+            // Keeps the chord-size slider's bounds matched to the current melody: a chord
+            // can't sensibly contain more notes than there are distinct pitch-classes to
+            // draw from (min 2, since a 1-note "chord" isn't a chord). If a manually-set
+            // size no longer fits, it's clamped down. Skips touching .value while the user
+            // has the slider focused, so it never interrupts an in-progress drag.
+            function syncChordSizeRange(pcCount) {
+                const max = Math.max(2, pcCount);
+                chordSizeSlider.min = '2';
+                chordSizeSlider.max = String(max);
+                const h = state.harmony.autochordal;
+                if (h.chordSize !== 'auto' && h.chordSize > max) {
+                    h.chordSize = max;
+                    if (document.activeElement !== chordSizeSlider) {
+                        chordSizeSlider.value = String(max);
+                        chordSizeVal.textContent = String(max);
+                    }
+                }
+            }
+
+            function buildHarmonyUI(syncInput = true) {
+                const h = state.harmony;
+                const workingMod = 12 * state.n;
+                const isRotational = h.method === 'rotational';
+                const isAutochordal = h.method === 'autochordal';
+
+                [...methodSeg.children].forEach(b => b.classList.toggle('active', b.dataset.val === h.method));
+
+                chordGroup.style.display = isAutochordal ? 'none' : '';
+                voiceRoleGroup.style.display = isAutochordal ? 'none' : '';
+                autochordalGroup.style.display = isAutochordal ? '' : 'none';
+
+                if (isAutochordal) {
+                    const size = h.autochordal.chordSize;
+                    const isAuto = size === 'auto';
+                    chordSizeAutoBtn.classList.toggle('active', isAuto);
+                    chordSizeSlider.classList.toggle('auto-dimmed', isAuto);
+                    if (!isAuto) {
+                        chordSizeSlider.value = String(size);
+                        chordSizeVal.textContent = String(size);
+                    } else {
+                        // Show the currently auto-detected size so the slider starts from a
+                        // sensible position the moment the user grabs it.
+                        const lastDetected = (lastRender && lastRender.detected) ? lastRender.detected[0] : null;
+                        const shown = (lastDetected && lastDetected.length) ? lastDetected.length : parseInt(chordSizeSlider.value, 10) || 3;
+                        chordSizeSlider.value = String(shown);
+                        chordSizeVal.textContent = 'auto (' + shown + ')';
+                    }
+                    return;
+                }
+
+                const s = activeHarmonySettings();
+                chordGroupLabel.textContent = isRotational ? 'Chord criterion (intervallic)' : 'Chord shape (chromatic, mod ' + workingMod + ')';
+                if (syncInput) chordCritInput.value = s.chordData.join(' ');
+                populatePresets();
+                presetSelect.value = '';
+
+                const globalVal = globalDefaultValue();
+                if (isRotational) {
+                    const n = s.chordData.length || 1;
+                    voiceRoleLabel.textContent = 'Melody note is voice # (default, applies to all steps)';
+                    voiceIdxSlider.max = String(Math.max(0, n - 1));
+                    voiceIdxSlider.value = String(Math.min(globalVal, n - 1));
+                    voiceIdxVal.textContent = voiceIdxSlider.value;
+                } else {
+                    voiceRoleLabel.textContent = 'Melody note has role (default, applies to all steps)';
+                    voiceIdxSlider.max = '11';
+                    voiceIdxSlider.value = String(Math.min(globalVal, 11));
+                    voiceIdxVal.textContent = ROLE_NAMES_12[parseInt(voiceIdxSlider.value, 10)];
+                }
+
+                chordPreview.textContent = isRotational
+                    ? 'steps (rotate cyclically per voice): ' + s.chordData.join(' ')
+                    : 'shape (semitones from shape-root): ' + s.chordData.join(' ');
+            }
+
+            let histoSignature = '';
+
+            function syncStepSliders(stepCount) {
+                const h = state.harmony;
+                if (!h.enabled || h.method === 'autochordal') {
+                    histoWrap.style.display = 'none';
+                    histoSignature = '';
+                    return;
+                }
+                histoWrap.style.display = 'block';
+                const s = activeHarmonySettings();
+                const sig = h.method + '|' + stepCount + '|' + s.chordData.join(',');
+                if (sig !== histoSignature) {
+                    histoSignature = sig;
+                    renderHistogram(stepCount);
+                } else {
+                    refreshHistogramBars(stepCount);
+                }
+            }
+
+            function histoNS(tag, attrs) {
+                const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+                for (const k in attrs) e.setAttribute(k, attrs[k]);
+                return e;
+            }
+
+            // Full redraw: builds one bar per step plus gridlines. Called only when the
+            // structure changes (step count, method, or chord/shape size), so an in-progress
+            // drag is never interrupted (drags only trigger refreshHistogramBars).
+            function renderHistogram(stepCount) {
+                const h = state.harmony, s = activeHarmonySettings();
+                const isRotational = h.method === 'rotational';
+                const maxVal = isRotational ? Math.max(0, s.chordData.length - 1) : 11;
+                const overrides = isRotational ? s.voiceOverrides : s.roleOverrides;
+
+                const W = 800, H = 170, padL = 4, padR = 4, padTop = 18, padBottom = 4;
+                const plotH = H - padTop - padBottom;
+                const barGap = 3;
+                const barW = (W - padL - padR) / stepCount - barGap;
+
+                stepHisto.setAttribute('viewBox', `0 0 ${W} ${H}`);
+                stepHisto.setAttribute('preserveAspectRatio', 'none');
+                stepHisto.innerHTML = '';
+                stepHisto.dataset.stepCount = stepCount;
+                stepHisto.dataset.maxVal = maxVal;
+                stepHisto.dataset.padL = padL;
+                stepHisto.dataset.padTop = padTop;
+                stepHisto.dataset.plotH = plotH;
+                stepHisto.dataset.barW = barW;
+                stepHisto.dataset.barGap = barGap;
+
+                // gridlines at each integer value
+                for (let v = 0; v <= maxVal; v++) {
+                    const y = padTop + plotH * (1 - (maxVal > 0 ? v / maxVal : 0));
+                    stepHisto.appendChild(histoNS('line', {
+                        x1: padL, x2: W - padR, y1: y, y2: y,
+                        stroke: 'var(--rule)', 'stroke-width': 1, opacity: v === 0 ? 1 : 0.5
+                    }));
+                }
+
+                for (let i = 0; i < stepCount; i++) {
+                    const x = padL + i * (barW + barGap);
+                    const val = stepEffectiveValue(i);
+                    const overridden = (i in overrides);
+                    const barH = plotH * (maxVal > 0 ? val / maxVal : 0);
+                    const y = padTop + plotH - barH;
+
+                    const bar = histoNS('rect', {
+                        x, y, width: barW, height: Math.max(barH, 2),
+                        rx: 2,
+                        fill: overridden ? 'var(--rust)' : 'var(--reed)',
+                        class: 'histo-bar',
+                        'data-idx': i
+                    });
+                    stepHisto.appendChild(bar);
+
+                    const label = histoNS('text', {
+                        x: x + barW / 2, y: y - 4,
+                        'text-anchor': 'middle',
+                        'font-family': 'var(--mono)', 'font-size': '9',
+                        fill: overridden ? 'var(--brass)' : 'var(--paper-dim)',
+                        class: 'histo-label'
+                    });
+                    label.textContent = isRotational ? val : ROLE_NAMES_12[val];
+                    stepHisto.appendChild(label);
+
+                    const idxLabel = histoNS('text', {
+                        x: x + barW / 2, y: H - 3,
+                        'text-anchor': 'middle',
+                        'font-family': 'var(--mono)', 'font-size': '8.5',
+                        fill: 'var(--paper-faint)'
+                    });
+                    idxLabel.textContent = i;
+                    stepHisto.appendChild(idxLabel);
+                }
+            }
+
+            // Cheap update: repositions/recolors bars and labels in place, used when nothing
+            // structural changed (e.g. after committing a drag value or a global-default change).
+            function refreshHistogramBars(stepCount) {
+                const h = state.harmony, s = activeHarmonySettings();
+                const isRotational = h.method === 'rotational';
+                const maxVal = parseFloat(stepHisto.dataset.maxVal) || 0;
+                const padTop = parseFloat(stepHisto.dataset.padTop);
+                const plotH = parseFloat(stepHisto.dataset.plotH);
+                const overrides = isRotational ? s.voiceOverrides : s.roleOverrides;
+                const bars = stepHisto.querySelectorAll('.histo-bar');
+                const labels = stepHisto.querySelectorAll('.histo-label');
+
+                for (let i = 0; i < stepCount && i < bars.length; i++) {
+                    const val = stepEffectiveValue(i);
+                    const overridden = (i in overrides);
+                    const barH = plotH * (maxVal > 0 ? val / maxVal : 0);
+                    const y = padTop + plotH - barH;
+                    bars[i].setAttribute('y', y);
+                    bars[i].setAttribute('height', Math.max(barH, 2));
+                    bars[i].setAttribute('fill', overridden ? 'var(--rust)' : 'var(--reed)');
+                    labels[i].setAttribute('y', y - 4);
+                    labels[i].setAttribute('fill', overridden ? 'var(--brass)' : 'var(--paper-dim)');
+                    labels[i].textContent = isRotational ? val : ROLE_NAMES_12[val];
+                }
+            }
+
+            // Paint interaction: pointer-drag anywhere over the histogram sets whichever bar's
+            // column the cursor is over to the value implied by the cursor's height. A single
+            // drag gesture can sweep across many steps in one motion.
+            let histoDragging = false;
+            function histoValueFromEvent(e) {
+                const rect = stepHisto.getBoundingClientRect();
+                const stepCount = parseInt(stepHisto.dataset.stepCount, 10);
+                const maxVal = parseFloat(stepHisto.dataset.maxVal);
+                const padL = parseFloat(stepHisto.dataset.padL);
+                const padTop = parseFloat(stepHisto.dataset.padTop);
+                const plotH = parseFloat(stepHisto.dataset.plotH);
+                const barW = parseFloat(stepHisto.dataset.barW);
+                const barGap = parseFloat(stepHisto.dataset.barGap);
+                const viewW = 800;
+
+                const scaleX = viewW / rect.width;
+                const localX = (e.clientX - rect.left) * scaleX;
+                let idx = Math.floor((localX - padL) / (barW + barGap));
+                idx = Math.max(0, Math.min(stepCount - 1, idx));
+
+                const scaleY = 170 / rect.height; // viewBox H is fixed at 170
+                const localY = (e.clientY - rect.top) * scaleY;
+                let pct = 1 - (localY - padTop) / plotH;
+                pct = Math.max(0, Math.min(1, pct));
+                const val = Math.round(pct * maxVal);
+                return { idx, val };
+            }
+
+            stepHisto.addEventListener('pointerdown', (e) => {
+                histoDragging = true;
+                stepHisto.setPointerCapture(e.pointerId);
+                const { idx, val } = histoValueFromEvent(e);
+                setStepOverride(idx, val);
+                refreshHistogramBars(parseInt(stepHisto.dataset.stepCount, 10));
+                render();
+            });
+            stepHisto.addEventListener('pointermove', (e) => {
+                if (!histoDragging) return;
+                const { idx, val } = histoValueFromEvent(e);
+                setStepOverride(idx, val);
+                refreshHistogramBars(parseInt(stepHisto.dataset.stepCount, 10));
+                render();
+            });
+            stepHisto.addEventListener('pointerup', () => { histoDragging = false; });
+            stepHisto.addEventListener('pointercancel', () => { histoDragging = false; });
+
+            clearAllOverridesBtn.addEventListener('click', () => {
+                const s = activeHarmonySettings();
+                if (state.harmony.method === 'rotational') s.voiceOverrides = makeAlternatingOverrides();
+                else s.roleOverrides = makeConstantOverrides(2);
+                if (lastRender) refreshHistogramBars(lastRender.result.length);
+                render();
+            });
+
+            // Assigns every step an independent random override within the valid range for the
+            // active method (voice index for rotational, role index 0-11 for positional).
+            randomizeOverridesBtn.addEventListener('click', () => {
+                if (!lastRender) return;
+                const h = state.harmony, s = activeHarmonySettings();
+                const isRotational = h.method === 'rotational';
+                const maxVal = isRotational ? Math.max(0, s.chordData.length - 1) : 11;
+                const overrides = isRotational ? s.voiceOverrides : s.roleOverrides;
+                const stepCount = lastRender.result.length;
+                for (let i = 0; i < stepCount; i++) overrides[i] = Math.floor(Math.random() * (maxVal + 1));
+                refreshHistogramBars(stepCount);
+                render();
+            });
+
+            harmonyToggle.addEventListener('change', () => {
+                state.harmony.enabled = harmonyToggle.checked;
+                harmonyBody.classList.toggle('disabled', !state.harmony.enabled);
+                buildHarmonyUI();
+                render();
+            });
+
+            arpeggiateToggle.addEventListener('change', () => {
+                state.harmony.arpeggiate = arpeggiateToggle.checked;
+                arpPatternRow.style.display = state.harmony.arpeggiate ? 'flex' : 'none';
+            });
+
+            arpPatternSelect.addEventListener('change', () => {
+                state.harmony.arpPattern = arpPatternSelect.value;
+            });
+
+            [...methodSeg.children].forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.harmony.method = btn.dataset.val; // per-method settings retained (memory)
+                    buildHarmonyUI();
+                    render();
+                });
+            });
+
+            chordSizeAutoBtn.addEventListener('click', () => {
+                const h = state.harmony.autochordal;
+                if (h.chordSize === 'auto') {
+                    // Turning Auto off: seed the slider with whatever size was last auto-detected.
+                    const lastDetected = (lastRender && lastRender.detected) ? lastRender.detected[0] : null;
+                    h.chordSize = (lastDetected && lastDetected.length) ? lastDetected.length : parseInt(chordSizeSlider.value, 10);
+                } else {
+                    h.chordSize = 'auto';
+                }
+                buildHarmonyUI();
+                render();
+            });
+
+            chordSizeSlider.addEventListener('input', () => {
+                const v = parseInt(chordSizeSlider.value, 10);
+                state.harmony.autochordal.chordSize = v;
+                chordSizeVal.textContent = String(v);
+                chordSizeAutoBtn.classList.remove('active');
+                chordSizeSlider.classList.remove('auto-dimmed');
+                render();
+            });
+
+            presetSelect.addEventListener('change', () => {
+                if (presetSelect.value === '') return;
+                const preset = HARMONY_PRESETS[parseInt(presetSelect.value, 10)];
+                const isRotational = state.harmony.method === 'rotational';
+                const shape = isRotational ? preset.rotational : preset.positional;
+                if (!shape) return;
+                activeHarmonySettings().chordData = shape.slice();
+                chordCritInput.value = shape.join(' ');
+                buildHarmonyUI();
+                render();
+            });
+
+            chordCritInput.addEventListener('input', () => {
+                const parsed = parseCritInput(chordCritInput.value);
+                if (!parsed) { harmonyErr.textContent = 'invalid chord criterion'; return; }
+                harmonyErr.textContent = '';
+                activeHarmonySettings().chordData = parsed;
+                buildHarmonyUI(false);
+                render();
+            });
+
+            voiceIdxSlider.addEventListener('input', () => {
+                const v = parseInt(voiceIdxSlider.value, 10);
+                setGlobalDefaultValue(v);
+                voiceIdxVal.textContent = state.harmony.method === 'rotational' ? v : ROLE_NAMES_12[v];
+                render();
+            });
 
             // ─── Init ─────────────────────────────────────────────
             rootVal.textContent = midiName(state.root);
@@ -1350,6 +2669,7 @@
                 m: initLoad.m.slice(),
             };
             buildOffsetsUI();
+            buildHarmonyUI();
             render();
 
             let resizeTimer;
